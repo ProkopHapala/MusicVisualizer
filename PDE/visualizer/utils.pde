@@ -95,3 +95,18 @@ void linearFit(float [] freqs, int i0, int imax, float [] ydy ){
   ydy[0]=y0-dy*0.5;
   ydy[1]=y0+dy*0.5;
 }
+
+void linearFit2(float [] freqs, int i0, int imax, float [] ydy ){
+  int n = imax-i0;
+  float d = 1./n;
+  float I2=0;
+  float I1=0;
+  for(int i=i0;i<imax;i++){
+    float x = (i-i0+0.5)*d;
+    float y = freqs[i]*d;
+    I1 += y*(1-x);
+    I2 += y*   x ;
+  }
+  ydy[0] = (I2+I1)*0.5;
+  ydy[1] = (I2-I1)*1.0;
+}

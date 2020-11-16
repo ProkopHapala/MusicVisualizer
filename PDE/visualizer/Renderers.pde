@@ -25,23 +25,26 @@ class Renderer_Spectrum implements MusicRenderer{
     fft.forward(song.mix);
     soundPower = downSampleSpectrum( fft, freqs );
     conv( freqs_smooth, freqs, 0.05 );
-    linearFit(freqs_smooth, 2,15, ydy );
+    //linearFit(freqs_smooth, 2,15, ydy );
+    linearFit2(freqs_smooth, 2,28, ydy );
   }
   
   void draw(){
     strokeWeight(1);
-    stroke( ((frameCount)&0xff), 255, 255);
     //drawSpectrum( fft, height*0.9, 3.0, 0.7 );
     float scx = 12.0;
     float scy = 0.3;
     float y0  = height*0.9;
+    stroke( 0, 150, 255);
     drawFreqs( freqs, y0, scy, scx );
+    stroke( 0, 0, 255);
     drawFreqs( freqs_smooth, y0, scy, scx );
     stroke( 255, 0, 255);
     //line( 3*scx, y0-ydy[0]*scy, 12*scx, y0-(ydy[0]+((12-3)*ydy[1]))*scy );
-    line( 2*scx, y0-ydy[0]*scy, 15*scx, y0-ydy[1]*scy );
-    fill(0,0,0,5);
-    //rect(0,0,width,height);
+    stroke( 0, 0.0, 0.5);
+    line  ( 2*scx, y0-ydy[0]*scy, 28*scx, y0-ydy[1]*scy );
+    stroke( 0, 0, 0);
+    line  ( 0, y0, 32*scx, y0 );
   }
   
 }

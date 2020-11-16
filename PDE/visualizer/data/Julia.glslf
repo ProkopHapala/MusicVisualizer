@@ -35,6 +35,9 @@ uniform vec2 Const;
 	the technique was devised by Damien Jones in 1999, the idea is to color based
 	the sum of the angles of z as it's being iterated.  I am also using a sinus function
 	in the loop to greate a more "hairy" look.
+	
+	Try also Triangle Inequality Colloring
+	https://www.shadertoy.com/view/wlXyDX
 
 	I should be converting to hsv to do color blending, but it looks good enough that way.
 */
@@ -42,6 +45,7 @@ uniform vec2 Const;
 //#define ITR 64.
 //#define ITR 32.
 #define ITR 16.
+//#define ITR 8.
 //#define ITR 8.
 #define BAILOUT 1e10
 
@@ -51,6 +55,16 @@ uniform vec2 Const;
 
 #define time iTime
 mat2 mm2(const in float a){float c=cos(a), s=sin(a);return mat2(c,-s,s,c);}
+
+
+
+float fR2( float x ){
+    float f = 1 - min( x*x, 1.0);
+    return f*f;
+}
+
+
+
 
 //lerp between 3 colors
 //usage: 0=a | 0.33=b | 0.66=c | 1=a
@@ -103,6 +117,9 @@ vec2 render(in vec2 z, in vec2 C ){
 	rz2 = rz2 / (numitr-1.);
 	rz  = mix(rz2,rz,f);
     return vec2(rz,rz2);
+    
+    // https://www.shadertoy.com/view/wlXyDX
+    // Try Trinagle Inequality Colloring
 }
 
 //void mainImage( out vec4 fragColor, in vec2 fragCoord ){
@@ -121,11 +138,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 	//rz += render( p+vec2(0.,-d.y), Const );
 	//rz /= 4.;
 	
-    rz = render( p, Const );
+	rz = render( p, Const);
+	//rz = render( p, p.yx * Const );
+    //rz = render( p, Const*p );
     //rz = render( p, iMouse.xy );
     
 	//coloring
 	
+	/*
 	rz.y      = smoothstep(0.,1.2,rz.x);
 	vec3 col  = (sin(vec3(R,G,B)+6.*rz.y+2.9)*.5+0.51)*1.4;
 	vec3 col2 = vec3(R*(sin(rz.x*5.+1.2)),G*sin(rz.x*5.+4.1),B*sin(rz.x*5.+4.4));
@@ -136,9 +156,30 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 	//col       = wheel(col,col2,col3,fract((time-20.)*0.015));
 	col       = tanh( wheel(col,col2,col3, 0.35 )*2.3 );
 	col       = tone(col,.8)*3.5;
-	//col.y=1.-col.y;
+	*/
+	
+	float c0= fR2((rz.x-0.1)*5.0)*10.0;
+	float c1= fR2((rz.x-0.2)*4.0);
+	float c2= fR2((rz.x-0.6)*5.0);
+	float c3= fR2((rz.x-0.9)*5.0);
+	vec3 col = vec3( c1*1.2+c2*0.7+c0, c2+c0, c0+c3 );
+	
+	//vec3 col = vec3(rz.x, rz.y, 0.0);
+	
+	//float f = 1/(1+dot(p,p)*0.25); f=f*f; f=f*f;
+	float f = (1-dot(p,p)/4); f=f*f;
+	col = col*f*1.2 + vec3(0.07,0.0,0.1)*(1-f);
+	
+	
 	fragColor = vec4(col,1.);
 	
+	/*
+	//p = rz;
+	// Heart Formula // https://mathworld.wolfram.com/HeartCurve.html
+	float f = ( p.x*p.x + p.y*p.y - 1.);
+	float c = ( f*f*f - p.x*p.x*p.y*p.y*p.y - 0.001 ) * -1000;
+	fragColor = vec4( c, 0, 0, 1.);
+	*/
 	
 	//fragColor = vec4( sin(gl_FragCoord.xy), Const.x, 1.);
 	//fragColor = vec4( sin(p*30.00), 1., 1.);

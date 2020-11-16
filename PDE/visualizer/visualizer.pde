@@ -145,10 +145,11 @@ void setupJulia(){
   DwShadertoy sh = stack.shaders.get("main");  
   //sh.shader.uniform2f("Const", ydy[0], ydy[1] );
   float ph = frameCount*0.001;
-  time += pow(soundPower,0.3)*0.00003; 
+  time += (0.0005 + pow(soundPower,0.3)*0.0003)*0.7; 
   ph=time;
-  float cx = sin(ph*1.9597)*0.3 + 0.5  + ydy[0]*-0.0015;
-  float cy = cos(ph*1.1648)*0.3 + 0.25 + ydy[1]*-0.0015;
+  //println( "ydy "+ ydy[0] +" "+ ydy[1] );
+  float cx = sin(ph*1.9597)*0.3 + 0.5  + ydy[0]*-0.015;
+  float cy = cos(ph*1.1648)*0.3 + 0.25 + ydy[1]*-0.015;
   //println( cx+" "+cy );
   sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
   //sh.set_iMouse( cx, cy, cx, cy );
@@ -162,17 +163,16 @@ void draw() {
   if(hold_skip){ song.skip( rewindStep ); }
   renderSpectrum.update();
    
-    
-    
-    
+     
   blendMode(REPLACE);
   setupJulia();
   stack.time = frameCount* 0.01;
   stack.render(); ///  BIG RENDER HERE
   
+  
   resetShader(); blendMode(BLEND);
   
-  //fill(0,0,1,0.01); rect(0,0,width,height);
+  fill(0,0,1,0.01); rect(0,0,width,height);
  
   renderSpectrum.draw();
   float done = song.position()/(float)song.length();  stroke(0,0,1,1); rect(0,0,width*done,5);
