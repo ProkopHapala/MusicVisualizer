@@ -58,10 +58,16 @@ mat2 mm2(const in float a){float c=cos(a), s=sin(a);return mat2(c,-s,s,c);}
 
 
 
-float fR2( float x ){
+float fR( float x ){
     float f = 1 - min( x*x, 1.0);
     return f*f;
 }
+
+float fR2( float r2 ){
+    float f = 1 - min( r2, 1.0);
+    return f*f;
+}
+
 
 
 
@@ -127,6 +133,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 	//vec2 p = (fUV*4.0)+vec2(-2.0,-2.0);
 	
 	vec2 p = ( fragCoord.xy / iResolution.xy )*4.0 - 2.0;
+	vec2 p_ = p;
 	p*=0.8;
 	p.x *= iResolution.x/iResolution.y;
     vec2 rz = vec2(0);
@@ -158,16 +165,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 	col       = tone(col,.8)*3.5;
 	*/
 	
-	float c0= fR2((rz.x-0.1)*5.0)*10.0;
-	float c1= fR2((rz.x-0.2)*4.0);
-	float c2= fR2((rz.x-0.6)*5.0);
-	float c3= fR2((rz.x-0.9)*5.0);
+	float c0= fR((rz.x-0.1)*5.0)*10.0;
+	float c1= fR((rz.x-0.2)*4.0);
+	float c2= fR((rz.x-0.6)*5.0);
+	float c3= fR((rz.x-0.9)*5.0);
 	vec3 col = vec3( c1*1.2+c2*0.7+c0, c2+c0, c0+c3 );
 	
 	//vec3 col = vec3(rz.x, rz.y, 0.0);
 	
 	//float f = 1/(1+dot(p,p)*0.25); f=f*f; f=f*f;
-	float f = (1-dot(p,p)/4); f=f*f;
+	float f = fR2(dot(p_,p_)/5.); f=f*f;
 	col = col*f*1.2 + vec3(0.07,0.0,0.1)*(1-f);
 	
 	

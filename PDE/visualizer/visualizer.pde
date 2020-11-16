@@ -58,6 +58,9 @@ Renderer_RotTree         renderRT;
 MusicRenderer            render; 
 Renderer_ParticleFission renderFission;
 Renderer_Spectrum        renderSpectrum;
+Renderer_FlowField       renderFlow;
+
+FlowField_centers ffc;
 
 float dt          = 0.025;
 float time        = 0;
@@ -79,8 +82,10 @@ boolean hold_skip = false;
 // ================= INITIALIZE PROGRAM
 
 void settings() {
-  size(800, 800, P2D);
-  smooth(0);
+  fullScreen(P2D);
+  //size(800, 800, P2D);
+  smooth(0);    // WARRNING : !!!! Make sure smooth(0) is required for proper function of pixelFlow library and RenderStack
+  //smooth(8);  // This Breaks 
 }
 
 void setup() {
@@ -108,6 +113,14 @@ void setup() {
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
   renderFission = new Renderer_ParticleFission(1024);
+  
+  ffc        = new FlowField_centers(freqs.length);
+  renderFlow = new Renderer_FlowField(64,32);
+  renderFlow.initCursors();
+  renderFlow.ffield = ffc;
+  for(int i=0; i<ffc.np; i++){  ffc.set( i, random(100,width-100), random(100,height-100), -random(1000.0), random(-200.0,200.0), random(-100.0,100.0) );  };
+  //ffc.set( 0,  400,400, -1000.0, 0.0, 0.0 );
+  //ffc.set( 1,  600,600, 0.0, 0.0, 100.0 );
   
   context = new DwPixelFlow(this);
   context.print();
@@ -148,8 +161,8 @@ void setupJulia(){
   time += (0.0005 + pow(soundPower,0.3)*0.0003)*0.7; 
   ph=time;
   //println( "ydy "+ ydy[0] +" "+ ydy[1] );
-  float cx = sin(ph*1.9597)*0.3 + 0.5  + ydy[0]*-0.015;
-  float cy = cos(ph*1.1648)*0.3 + 0.25 + ydy[1]*-0.015;
+  float cx = sin(ph*1.9597)*0.3 + -0.80 + ydy[0]*0.015;
+  float cy = cos(ph*1.1648)*0.3 + -0.15 + ydy[1]*0.015;
   //println( cx+" "+cy );
   sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
   //sh.set_iMouse( cx, cy, cx, cy );
@@ -162,24 +175,31 @@ void draw() {
   int rewindStep = 1000;
   if(hold_skip){ song.skip( rewindStep ); }
   renderSpectrum.update();
-   
      
-  blendMode(REPLACE);
+  /*   
+  //blendMode(REPLACE);
+  //smooth(0); // WARRNING : !!!! Make sure smooth(0) is in  settings(); function !!!!!
   setupJulia();
-  stack.time = frameCount* 0.01;
+  stack.time = frameCount * 0.01;
   stack.render(); ///  BIG RENDER HERE
-  
+  */
   
   resetShader(); blendMode(BLEND);
   
-  fill(0,0,1,0.01); rect(0,0,width,height);
+  if(frameCount%30==0){ fill(0,0,1,0.02); rect(0,0,width,height); }
  
-  renderSpectrum.draw();
+  //renderSpectrum.draw();
   float done = song.position()/(float)song.length();  stroke(0,0,1,1); rect(0,0,width*done,5);
+  //beater.bDraw=true;
   beater.update(soundPower);
+  
+  
+  strokeWeight(1); stroke(0.,0.1); renderFlow.update();
+  ffc.update();
   
   //renderFission.update();
 
+  
 }
 
 void keyPressed(){

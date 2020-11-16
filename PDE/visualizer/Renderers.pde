@@ -224,14 +224,16 @@ class Renderer_ParticleFission implements MusicRenderer{
   void update(){ 
    if(beater.bJustBeat){
      //background(1.);
-     fill( 1.0, 0.3 );
+     //fill( 1.0, 0.3 );
+     fill( 1.0, 0.5 );
+     //fill( 1.0, 1.0 );
      rect(0,0,width,height);
      start(2,width/2,height/2,150.0);
    } 
    //smooth();
    strokeWeight(1);
    stroke(0,0,0,1);
-   println("n "+perFrame+" np "+np );
+   //println("n "+perFrame+" np "+np );
    for(int itr=0; itr<perFrame; itr++){
      for(int i=0; i<np; i++){
        Particle p = ps[i];
@@ -297,4 +299,149 @@ void branch( int level, float s, float ds, float x0, float y0, float ux, float u
    //strokeWeight(1); stroke(50,150,150,15);   drawBonds();
   }
 
+}
+
+// ========== Renderer Flow Field
+interface FlowField{ float eval(float x,float y, float[] out); };
+
+class FlowField_centers implements FlowField{
+  int np;
+  float [] xs;
+  float [] ys;
+  float [] dxs;
+  float [] dys;
+  float [] rots;
+  float vx = 1.0;
+  float vy = 0.0;
+  
+  FlowField_centers(int np_){
+    np = np_;
+    xs   = new float[np];
+    ys   = new float[np];
+    dxs  = new float[np];
+    dys  = new float[np];
+    rots = new float[np];
+  }
+  
+  void set(int i, float x, float y, float dx, float dy, float rot){
+    xs[i]=x; ys[i]=y; dxs[i]=dx; dys[i]=dy; rots[i]=rot;
+  }
+  
+  float eval(float x,float y, float[] out){
+    float fx=0;
+    float fy=0;
+    for(int i=0; i<np; i++){
+      float dx = x - xs[i];
+      float dy = y - ys[i];
+      float invr2 = 1/(dx*dx + dy*dy);
+      //float invr  = sqrt(invr2);
+      //float invr3 = invr*invr2;
+      float invr4 = invr2*invr2;
+      float rot = rots[i]*invr2;
+      // see https://en.wikipedia.org/wiki/Potential_flow#Power_laws_with_n_=_%E2%88%921:_doublet
+      float Dx = dxs[i];
+      float Dy = dys[i];
+      float da = (dx*dx - dy*dy)*invr4;
+      float db = (2*dx*dy)*invr4;
+      //float a2 = a*a;  // Taylor Approx of sinus and cosinus
+      //float sa = a * ( 1 - a2*( 0.16666666666  - 0.00833333333*a2 ) );
+      //float ca =       1 - a2*( 0.50000000000 - 0.04166666666*a2 )   ;
+      fx += (Dx*da - Dy*db) - dy*rot;
+      fy += (Dy*da + Dx*db) + dx*rot;
+    }
+    fx+=vx; fy+=vy;
+    out[0]=fx;out[1]=fy;
+    return 0;
+  }
+  
+  void update(){
+     if(beater.bJustBeat){
+       fill( 1.0, 1.0 );
+       rect(0,0,width,height);
+       for(int i=0; i<ffc.np; i++){ ffc.xs[i] = random(100,width-100); ffc.ys[i] = random(100,height-100);  };
+     } 
+  }
+  
+}
+
+class Renderer_FlowField{
+  int   np,nc;
+  float [] xs;
+  float [] ys;
+  float [] fxy;
+  FlowField ffield;
+  float dt = 1.0;
+  int perFrame = 100;
+  float restartProb = 0.01;
+  
+  //float curX=width/2;
+  //float curY=height/2;
+  
+  float [] curWs;
+  float [] curXs;
+  float [] curYs; 
+  
+  Renderer_FlowField(int np_, int nc_){
+    np=np_; nc=nc_;
+    xs = new float[np];
+    ys = new float[np];
+    curXs = new float[nc];
+    curYs = new float[nc]; 
+    curWs = new float[nc];
+    fxy= new float[2];
+  }
+
+  void initCursors(){  
+    for(int i=0; i<nc; i++){
+      curXs[i] = random(100,width -100);
+      curYs[i] = random(100,height-100);
+      curWs[i] = 10.0;
+    }
+  }
+
+  void updateCursors(){
+    for(int i=0; i<nc; i++){
+      //float speed = 10;
+      float speed = freqs[i];
+      //curWs[i] = 10.0/(0.1+freqs_smooth[i]);
+      //curWs[i] = 2.0 + freqs_smooth[i]*0.1;
+      curWs[i] = 2.0;
+      float x = curXs[i];
+      float y = curYs[i];
+      x += random(-1.,1.)*speed;
+      y += random(-1.,1.)*speed;
+      if(x<0     )x+=width;
+      if(x>width )x-=width;
+      if(x<0     )x+=height;
+      if(x>height)x-=height;
+      curXs[i]=x;
+      curYs[i]=y;
+    }
+  }
+
+  void update(){
+    
+    updateCursors();
+    
+    for(int itr=0; itr<perFrame; itr++){
+    for(int i=0; i<np; i++){
+      float x=xs[i];
+      float y=ys[i];
+      //if( (x>width)||(x<0)||(y>height)||(y<0) ){ x=5;y=random(5,height-5); }     
+      if(restartProb>random(1.)){ 
+        //x=random(5,width-5);y=random(5,height-5);
+        int icur = (int)((i*2654435769L)%nc);
+        float curWidth = curWs[icur];
+        x=curXs[icur]+random(-curWidth,curWidth);y=curYs[icur]+random(-curWidth,curWidth);
+      } 
+      ffield.eval(x,y,fxy);
+      float x_ = x + fxy[0]*dt;
+      float y_ = y + fxy[1]*dt;
+      if(bDraw){ line(x,y,x_,y_); }
+      xs[i]=x_;
+      ys[i]=y_;
+    }
+    }
+  }
+  
 }

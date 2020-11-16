@@ -24,9 +24,9 @@ class BeatDetector{
   
     if(bDraw){
        int frame = frameCount%width;
-       float sc = 0.0005;
-       stroke(0);       line(frame,0,frame,P*sc);
+       float sc = 0.005;
        strokeWeight(2.0);
+       stroke(0.0,1.0);     line(frame-1,      0,frame,P*sc);
        stroke(1.0,1.0,1.0); line(frame-1, oP_*sc,frame,oP*sc);
        stroke(0.5,1.0,1.0); line(frame-1,ooP_*sc,frame,ooP*sc);
         if( bJustBeat ){
