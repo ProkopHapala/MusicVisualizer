@@ -1,55 +1,90 @@
 
+
+/*
+
+ToDo 
+ * Input can be either image (DwGLTexture) or FrameBuffer  DwShadertoy
+
+*/
+
+
 import java.util.Map;
 
 class RenderPass{
-  PShader  sh;
+  //PShader  sh;
+  DwShadertoy sh;
   int     out;
-  int []  ins;
-  RenderPass(int nin){ ins=new int[nin]; }
+  //int []  ins;
+  DwGLTexture [] ins;
+  //RenderPass(int nin){ ins=new int[nin]; }
+  RenderPass(int nin){ ins=new DwGLTexture[nin]; }
 };
 
 class RenderStack{
+  DwPixelFlow  context;
   int nx,ny;
   int nimg;
-  HashMap<String,PShader> shaders;
-  ArrayList<RenderPass>   passes;
-  ArrayList<PGraphics>    images;
+  HashMap<String,DwShadertoy>  shaders;
+  ArrayList<RenderPass>        passes;
+  HashMap<String,DwGLTexture>  images;
   float time;
-  float mx,my;
+  float mx,my, omx, omy;
 
-RenderStack( int nx_, int ny_ ){
+RenderStack( int nx_, int ny_ , DwPixelFlow context_){
+  context=context_;
   nx=nx_; ny=ny_;
-  shaders = new HashMap<String,PShader>();
-  images  = new ArrayList<PGraphics>(); 
+  shaders = new HashMap<String,DwShadertoy>();
+  images  = new HashMap<String,DwGLTexture>(); 
   passes  = new ArrayList<RenderPass>();
 };
 
+void addImage( String name, String sInit ){
+  DwGLTexture img = new DwGLTexture();
+  images.put( name, img );
+  
+  if( sInit.equals("random") ){
+    int wh = 256;
+    byte[] bdata = new byte[wh * wh * 4];
+    ByteBuffer bbuffer = ByteBuffer.wrap(bdata);
+    for(int i = 0; i < bdata.length;){
+      bdata[i++] = (byte) random(0, 255);
+      bdata[i++] = (byte) random(0, 255);
+      bdata[i++] = (byte) random(0, 255);
+      bdata[i++] = (byte) 255;
+    }
+    img.resize(context, GL2.GL_RGBA8, wh, wh, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, GL2.GL_LINEAR, GL2.GL_MIRRORED_REPEAT, 4, 1, bbuffer);
+   }
+
+}
+
+void addShader( String name, String fpath ){
+    String ss = "data/"+fpath+".glslf";
+    println( ss );
+    DwShadertoy sh = new DwShadertoy(context, ss );
+    shaders.put( name, sh );
+}
+
 void addScriptLine(String s){
   String[]   ws = splitTokens( s );
-  RenderPass rc = new RenderPass( ws.length-3 );
+  int noff = 2;
+  int nin = ws.length-noff;
+  //println( "nin "+nin );
+  RenderPass rc = new RenderPass( nin );
   passes.add(rc);
-  // --- load shader if new
-  String name     = ws[0];
-  PShader sh = shaders.get(name);
-  if(sh==null){
-    String ss = name+".glslf";
-    println( ss );
-    sh = loadShader(ss); 
-    shaders.put( name, sh );
+  String name     = ws[0].trim();
+  DwShadertoy sh = shaders.get(name);
+  //println("name >>"+name+"<<");
+  if(name.equals("main")){ rc.out=-1; }
+  for(int i=0; i<nin; i++){
+    String w = ws[noff+i];
+    DwShadertoy insh = shaders.get( w );
+    if(insh==null){
+      rc.ins[i] = images.get( w );
+    }else{
+      rc.ins[i] = insh.tex; 
+    }
   }
   rc.sh=sh;
-  // --- set input and output textures
-  rc.out   = int(ws[1]);
-  nimg     = max( nimg, rc.out );
-  String sep  = ws[2];
-  for(int i=3; i<ws.length; i++){
-    int iin     = int(ws[i]);
-    rc.ins[i-3] = iin;
-    nimg        = max( nimg, iin );
-  }
-  nimg++;
-  //images.ensureCapacity( nimg+1 );
-  //println( "nimg "+ nimg + " " + images.size() );
 }
 
 void loadScrip( String fname){
@@ -58,37 +93,21 @@ void loadScrip( String fname){
 }
 
 void prepare(){
-  //println( "prepare " + images.size() );
-  for(int i=0;i<nimg; i++){
-    //println( "crate image  " + i );
-    PGraphics pg = createGraphics(nx, ny, P2D);
-    pg.textureWrap(REPEAT);
-    images.add( pg );
+  for(DwShadertoy sh : shaders.values() ){
+    //shader(sh);
+    sh.set_iResolution( (float)nx, (float)ny, 1.0 );
   }
-  for(PShader sh : shaders.values() ){
-    shader(sh);
-    sh.set("iResolution", (float)nx, (float)ny);
-  }
-  
 }
 
 void render( RenderPass rc ){
-  PGraphics pg;
-  println(  rc.out +" "+ rc.ins.length );
-  if(rc.out<0){ pg = (PGraphics)g;       }
-  else        { pg = images.get(rc.out); }
-  pg.beginDraw();
-  pg.shader( rc.sh );
-  rc.sh.set( "iMouse", mx,my );
-  rc.sh.set( "iTime" , time );
+  DwShadertoy sh = rc.sh;
+  sh.set_iMouse( mx,my, omx,omy );
+  sh.set_iTime(  time );
   for(int i=0;i<rc.ins.length;i++){
-    String name = "iChannel"+int(i);
-    print( ">>"+name+"<<");
-    rc.sh.set( name, images.get( rc.ins[i] ) );
+    sh.set_iChannel( i, rc.ins[i] );
   }
-  //println(  rc.out +" "+ rc.ins.length );
-  pg.rect(0, 0, nx, ny);
-  pg.endDraw();
+  if(rc.out<0){ sh.apply(g);    }
+  else        { sh.apply(nx, ny); }
 }
 
 void render(){

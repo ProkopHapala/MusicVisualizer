@@ -25,7 +25,8 @@ void fillTex_sin( PGraphics pg, float fx, float fy ){
   pg.updatePixels();
 }
 
-void downSampleSpectrum( FFT fft, float [] freqs ){
+float downSampleSpectrum( FFT fft, float [] freqs ){
+  float sum2  = 0;
   float step = (freqs.length-1)/(float)fft.specSize();
   for(int i=0; i<freqs.length; i++){ freqs[i]=0; }
   for(int i=0; i<fft.specSize(); i++){
@@ -33,9 +34,11 @@ void downSampleSpectrum( FFT fft, float [] freqs ){
     int   ix  = (int)x;
     float dx  = x-ix;
     float val =  fft.getBand(i)   * step *(i+1);
+    sum2 += val*val;
     freqs[ix  ] += val*(1-dx);
     freqs[ix+1] += val*dx;
   }
+  return sum2;
 }
 
 void drawSpectrum( FFT fft, float y0, float scy, float scx ){
@@ -56,6 +59,24 @@ void drawFreqs( float [] freqs, float y0, float scy, float scx ){
   }
 }
 
+void conv( float [] v, float [] vnew, float K ){
+  float M = 1-K;
+  for(int i = 1; i < freqs.length; i++){
+    v[i] = v[i]*M + vnew[i]*K;
+  }
+}
+
+float lrp( float x, float [] freqs ){
+  //float step = 1.0/;
+  float s  = x*(freqs.length-1);
+  int   i  = (int)s;
+  float d  = s-i;
+  float m  = 1-d; 
+  float f = freqs[i]*m + freqs[i+1]*d;
+  f=freqs[i];
+  //println( "s "+s+" d "+d+" i "+i+ " f "+f );
+  return f;
+}
 
 void linearFit(float [] freqs, int i0, int imax, float [] ydy ){
   float y0 = 0;
