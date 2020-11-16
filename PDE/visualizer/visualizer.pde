@@ -60,10 +60,11 @@ Renderer_ParticleFission renderFission;
 Renderer_Spectrum        renderSpectrum;
 
 float dt          = 0.025;
+float time        = 0;
 //float dt          = 1.0;
 float KCoul       = 1.0;
 //float dt        = 0.025;
-float friction    = 0.02;
+float friction    = 0.08;
 float fissionProb = 0.05;
 float dieProb     = 0.00001;
 float qSpread = 0.7;
@@ -93,9 +94,9 @@ void setup() {
   
   minim = new Minim(this);
   playlist = new PlayList();
-  playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
+  //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
   //playlist.addDirRecur( "D:\\hudba\\Basil Poledouris", 10 );
-  //playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Basil Poledouris", 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Basil Poledouris", 10 );
   
   beater = new BeatDetector();
   beater.k1        = 0.3;
@@ -113,18 +114,22 @@ void setup() {
   context.printGL();
     
   stack = new RenderStack( width, height, context );
-  stack.addImage("noise", "random" );  
-  stack.addShader( "A", "ExpansiveReactionDiffusion_BufA" );
-  stack.addShader( "B", "ExpansiveReactionDiffusion_BufB" );
-  stack.addShader( "C", "ExpansiveReactionDiffusion_BufC" );
-  stack.addShader( "D", "ExpansiveReactionDiffusion_BufD" );
-  stack.addShader( "main", "ExpansiveReactionDiffusion_main" );
-  stack.addScriptLine( "A : A C D noise" );
-  stack.addScriptLine( "B : A" );
-  stack.addScriptLine( "C : B" );
-  stack.addScriptLine( "D : A" );
-  stack.addScriptLine( "main : A C noise" );
-  //stack.addScriptLine( "main :" );
+  
+  // --- Script 1 : ExpansiveReactionDiffusion
+  //stack.addImage("noise", "random" );  
+  //stack.addShader( "A", "ExpansiveReactionDiffusion_BufA" );
+  //stack.addShader( "B", "ExpansiveReactionDiffusion_BufB" );
+  //stack.addShader( "C", "ExpansiveReactionDiffusion_BufC" );
+  //stack.addShader( "D", "ExpansiveReactionDiffusion_BufD" );
+  //stack.addShader( "main", "ExpansiveReactionDiffusion_main" );
+  //stack.addScriptLine( "A : A C D noise" );
+  //stack.addScriptLine( "B : A" );
+  //stack.addScriptLine( "C : B" );
+  //stack.addScriptLine( "D : A" );
+  //stack.addScriptLine( "main : A C noise" );
+  
+  stack.addShader    ( "main", "Julia" );
+  stack.addScriptLine( "main :" );
   
   stack.prepare();
  
@@ -136,23 +141,51 @@ void setup() {
 
 // ================= DRAW EACH FRAME
 
+void setupJulia(){
+  DwShadertoy sh = stack.shaders.get("main");  
+  //sh.shader.uniform2f("Const", ydy[0], ydy[1] );
+  float ph = frameCount*0.001;
+  time += pow(soundPower,0.3)*0.00003; 
+  ph=time;
+  float cx = sin(ph*1.9597)*0.3 + 0.5  + ydy[0]*-0.0015;
+  float cy = cos(ph*1.1648)*0.3 + 0.25 + ydy[1]*-0.0015;
+  //println( cx+" "+cy );
+  sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
+  //sh.set_iMouse( cx, cy, cx, cy );
+}
+
 void draw() {
   song = playlist.song;
   fft  = playlist.fft; 
-  
-  //blendMode(REPLACE);    
-  //stack.time = frameCount* 0.01;
-  //stack.render(); ///  BIG RENDER HERE
-  
-  resetShader();
-  
-  fill(0,0,1,0.01); rect(0,0,width,height);
-  
+  playlist.update();
+  int rewindStep = 1000;
+  if(hold_skip){ song.skip( rewindStep ); }
   renderSpectrum.update();
-  //renderSpectrum.draw();
+   
+    
+    
+    
+  blendMode(REPLACE);
+  setupJulia();
+  stack.time = frameCount* 0.01;
+  stack.render(); ///  BIG RENDER HERE
   
-  renderFission.update();
+  resetShader(); blendMode(BLEND);
+  
+  //fill(0,0,1,0.01); rect(0,0,width,height);
+ 
+  renderSpectrum.draw();
+  float done = song.position()/(float)song.length();  stroke(0,0,1,1); rect(0,0,width*done,5);
   beater.update(soundPower);
   
-  
+  //renderFission.update();
+
+}
+
+void keyPressed(){
+    if (keyCode == RIGHT ){ hold_skip = true; } 
+}
+
+void keyReleased(){
+    if (keyCode == RIGHT ){ hold_skip = false;  } 
 }

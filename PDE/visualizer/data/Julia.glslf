@@ -1,19 +1,31 @@
 
 
-#ifdef GL_ES
-precision highp float;
-#endif
+#version 150
 
-#define PROCESSING_COLOR_SHADER
+#define SAMPLER0 sampler2D // sampler2D, sampler3D, samplerCube
+#define SAMPLER1 sampler2D // sampler2D, sampler3D, samplerCube
+#define SAMPLER2 sampler2D // sampler2D, sampler3D, samplerCube
+#define SAMPLER3 sampler2D // sampler2D, sampler3D, samplerCube
 
-uniform float iTime;
-uniform vec2  iMouse;
-uniform vec2  iResolution;
+uniform SAMPLER0 iChannel0; // image/buffer/sound    Sampler for input textures 0
+uniform SAMPLER1 iChannel1; // image/buffer/sound    Sampler for input textures 1
+uniform SAMPLER2 iChannel2; // image/buffer/sound    Sampler for input textures 2
+uniform SAMPLER3 iChannel3; // image/buffer/sound    Sampler for input textures 3
 
-uniform vec2  Const;
+uniform vec3  iResolution;           // image/buffer          The viewport resolution (z is pixel aspect ratio, usually 1.0)
+uniform float iTime;                 // image/sound/buffer    Current time in seconds
+uniform float iTimeDelta;            // image/buffer          Time it takes to render a frame, in seconds
+uniform int   iFrame;                // image/buffer          Current frame
+uniform float iFrameRate;            // image/buffer          Number of frames rendered per second
+uniform vec4  iMouse;                // image/buffer          xy = current pixel coords (if LMB is down). zw = click pixel
+uniform vec4  iDate;                 // image/buffer/sound    Year, month, day, time in seconds in .xyzw
+uniform float iSampleRate;           // image/buffer/sound    The sound sample rate (typically 44100)
+uniform float iChannelTime[4];       // image/buffer          Time for channel (if video or sound), in seconds
+uniform vec3  iChannelResolution[4]; // image/buffer/sound    Input texture resolution for each channel
 
-uniform sampler2D iChannel0;
-uniform sampler2D iChannel1;
+
+uniform vec2 Const;
+
 
 //Curvature average by nimitz (stormoid.com) (twitter: @stormoid)
 
@@ -94,12 +106,11 @@ vec2 render(in vec2 z, in vec2 C ){
 }
 
 //void mainImage( out vec4 fragColor, in vec2 fragCoord ){
-void main( ){
+void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 	//vec2 p = (fUV*4.0)+vec2(-2.0,-2.0);
 	
-	vec2 p = ( gl_FragCoord.xy / iResolution.xy )*4.0 - 2.0;
-	
-	//p*=0.6;
+	vec2 p = ( fragCoord.xy / iResolution.xy )*4.0 - 2.0;
+	p*=0.8;
 	p.x *= iResolution.x/iResolution.y;
     vec2 rz = vec2(0);
     
@@ -111,6 +122,7 @@ void main( ){
 	//rz /= 4.;
 	
     rz = render( p, Const );
+    //rz = render( p, iMouse.xy );
     
 	//coloring
 	
@@ -125,10 +137,11 @@ void main( ){
 	col       = tanh( wheel(col,col2,col3, 0.35 )*2.3 );
 	col       = tone(col,.8)*3.5;
 	//col.y=1.-col.y;
-	gl_FragColor = vec4(col,1.);
+	fragColor = vec4(col,1.);
 	
-	//gl_FragColor = vec4( sin(gl_FragCoord.xy), 1., 1.);
-	//gl_FragColor = vec4( sin(p*30.00), 1., 1.);
+	
+	//fragColor = vec4( sin(gl_FragCoord.xy), Const.x, 1.);
+	//fragColor = vec4( sin(p*30.00), 1., 1.);
     
 	//gl_FragColor = vec4(rz,0.,1.);
 

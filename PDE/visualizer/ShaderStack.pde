@@ -101,7 +101,7 @@ void prepare(){
 
 void render( RenderPass rc ){
   DwShadertoy sh = rc.sh;
-  sh.set_iMouse( mx,my, omx,omy );
+  //sh.set_iMouse( mx,my, omx,omy );
   sh.set_iTime(  time );
   for(int i=0;i<rc.ins.length;i++){
     sh.set_iChannel( i, rc.ins[i] );
