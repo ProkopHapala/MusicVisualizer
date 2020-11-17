@@ -15,6 +15,8 @@ class PlayList{
 PlayList(){
   list = new ArrayList<String>();
 } 
+
+String getName(){ return list.get(songIndex); };
  
 void addDirRecur( String path, int level ){
   File folder  = dataFile(path);

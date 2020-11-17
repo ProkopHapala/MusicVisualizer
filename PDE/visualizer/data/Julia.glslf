@@ -152,7 +152,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     
 	//coloring
 	
-	/*
+	
 	rz.y      = smoothstep(0.,1.2,rz.x);
 	vec3 col  = (sin(vec3(R,G,B)+6.*rz.y+2.9)*.5+0.51)*1.4;
 	vec3 col2 = vec3(R*(sin(rz.x*5.+1.2)),G*sin(rz.x*5.+4.1),B*sin(rz.x*5.+4.4));
@@ -163,13 +163,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 	//col       = wheel(col,col2,col3,fract((time-20.)*0.015));
 	col       = tanh( wheel(col,col2,col3, 0.35 )*2.3 );
 	col       = tone(col,.8)*3.5;
-	*/
 	
+	/*
 	float c0= fR((rz.x-0.1)*5.0)*10.0;
 	float c1= fR((rz.x-0.2)*4.0);
 	float c2= fR((rz.x-0.6)*5.0);
 	float c3= fR((rz.x-0.9)*5.0);
 	vec3 col = vec3( c1*1.2+c2*0.7+c0, c2+c0, c0+c3 );
+	*/
 	
 	//vec3 col = vec3(rz.x, rz.y, 0.0);
 	

@@ -19,6 +19,7 @@ class VizualizerList{
     rules.get(icur).start();
   }
   void draw(){ rules.get(icur).draw(); }
+  String getName(){ return rules.get(icur).getName(); };
 }
 
 class Rulez_JuliaLike implements RulingClass{
@@ -26,6 +27,7 @@ class Rulez_JuliaLike implements RulingClass{
   String nickName;
   RenderStack stack;
   
+  // ToDo : We should make a method to read this params from string !!! (through HashMap/Dictionary)
   float timeRate0        = 0.0005*0.7;
   float timeRateVolume   = 0.0003*0.7;
   float timeRateVolPower = 0.3;
@@ -65,4 +67,25 @@ class Rulez_JuliaLike implements RulingClass{
   };
   void finish(){};
   String getName(){return nickName+"("+shaderName+")"; };
+}
+
+
+class Rulez_JustRenderer implements RulingClass{
+  MusicRenderer            renderer;
+  String name;
+  Rulez_JustRenderer(String name_, MusicRenderer renderer_){
+    renderer=renderer_;
+    name = name_;
+  }
+  void start(){
+    beater.bJustBeat  = true;
+    renderer.update();
+    fill(0,0,1,1); rect(0,0,width,height);
+  }
+  void draw  (){
+    resetShader(); blendMode(BLEND);
+    renderer.update();
+  };
+  void finish(){};
+  String getName(){return name; };
 }

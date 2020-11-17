@@ -82,9 +82,10 @@ BeatDetector beater;
 VizualizerList visList;
 RulingClass    suzerain;
 
+MusicRenderer            render; 
+
 Renderer_BondedBodyTree  renderBBT; 
 Renderer_RotTree         renderRT;
-MusicRenderer            render; 
 Renderer_ParticleFission renderFission;
 Renderer_Spectrum        renderSpectrum;
 Renderer_FlowField       renderFlow;
@@ -96,16 +97,18 @@ float freqMixRate = 0.02;
 float dt          = 0.025;
 float time        = 0;
 //float dt          = 1.0;
-float KCoul       = 1.0;
+float KCoul       = 0.5;
 //float dt        = 0.025;
-float friction    = 0.08;
-float fissionProb = 0.05;
-float dieProb     = 0.00001;
+float friction    = 0.04;
+float fissionProb = 0.08;
+float dieProb     = 0.000005;
 float qSpread = 0.7;
 float qConv   = 0.5;
 float mMargin = 0.3;
 
-boolean bDraw = true;
+boolean bDraw       = true;
+boolean bHUD        = true;
+boolean bDEBUG_DRAW = false; 
 
 boolean hold_skip = false;
 
@@ -129,8 +132,6 @@ void setup() {
   minim = new Minim(this);
   playlist = new PlayList();
 
-
-  
   //playlist.addDirRecur( "D:\\hudba\\Basil Poledouris", 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G", 10);
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Luca Turilli"    , 10 );
@@ -144,8 +145,6 @@ void setup() {
   
   //playlist.list.add( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G/Mindfields.mp3" );
   //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
-  
-  
   
   beater = new BeatDetector();
   beater.k1        = 0.3;
@@ -166,8 +165,8 @@ void setup() {
   jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
-  visList.next();
-    
+  
+
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
   renderFission = new Renderer_ParticleFission(1024);
@@ -180,8 +179,12 @@ void setup() {
   //ffc.set( 0,  400,400, -1000.0, 0.0, 0.0 );
   //ffc.set( 1,  600,600, 0.0, 0.0, 100.0 );
   
-
-    
+  
+  Rulez_JustRenderer jr; 
+  jr = new Rulez_JustRenderer( "FlowField",       renderFlow    );   visList.rules.add(jr);
+  jr = new Rulez_JustRenderer( "ParticleFission", renderFission );   visList.rules.add(jr);
+  
+ 
   stack = new RenderStack( width, height, context );
   
   // --- Script 1 : ExpansiveReactionDiffusion
@@ -211,6 +214,7 @@ void setup() {
  
   //song.play(0);
   playlist.nextSong();
+  visList.next();
   
 }
 
@@ -259,20 +263,35 @@ void draw() {
  
   visList.draw();
  
+  //renderSpectrum.draw();
+
   resetShader(); blendMode(BLEND);
   
-  if(frameCount%30==0){ fill(0,0,1,0.02); rect(0,0,width,height); }
- 
-  //renderSpectrum.draw();
-  float done = song.position()/(float)song.length();  stroke(1,1,1,1); rect(0,height-10,width*done,height);
   //beater.bDraw=true;
   beater.update(soundPower);
   
-  //strokeWeight(1); stroke(0.,0.05); renderFlow.update();
+  //renderFlow.update();
   //ffc.update();
-  
   //renderFission.update();
+  
 
+  
+  if(bDEBUG_DRAW){
+    beater.bDraw=true;
+    renderSpectrum.draw();
+  }else{ beater.bDraw=false; }
+  
+  if(bHUD){
+    float done = song.position()/(float)song.length();  stroke(1,1,1,1); rect(0,height-10,width*done,height);
+    //stroke(0,1,1,1);
+    noStroke();
+    fill(0,1);
+    rect( 50,0,600,30);
+    fill(1,1);
+    //textSize(8);
+    text( "Song:        "+playlist.getName(), 50, 15 );
+    text( "Visualizer: "+visList .getName(), 50, 27 );
+  }
   
 }
 
@@ -286,7 +305,9 @@ void mousePressed(){
 void keyPressed(){
     // ToDo - use cue() to set position in song by mouse     http://code.compartmental.net/minim/audioplayer_method_cue.html
     if (keyCode == RIGHT ){ hold_skip = true; } 
+    if (keyCode == TAB   ){ bHUD = !bHUD; }
     if (keyCode == ENTER ){ visList.next();   } 
+    if (key=='`'){ bDEBUG_DRAW=!bDEBUG_DRAW; } 
     //if (key == ' ' ){ song.cue(song.length()+1); playlist.nextSong(); } 
     if (key == ' ' ){ song.skip(song.length()); playlist.nextSong(); } 
     //if (key == ' ' ){  playlist.nextSong(); }

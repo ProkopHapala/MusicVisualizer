@@ -192,7 +192,7 @@ class Renderer_BondedBodyTree implements MusicRenderer{
 // ============== Particle Fission
 
 class Renderer_ParticleFission implements MusicRenderer{
-  int perFrame = 100;
+  int perFrame = 20;
   int npMax;
   int np;
   Particle [] ps;
@@ -302,7 +302,10 @@ void branch( int level, float s, float ds, float x0, float y0, float ux, float u
 }
 
 // ========== Renderer Flow Field
-interface FlowField{ float eval(float x,float y, float[] out); };
+interface FlowField{ 
+  float eval(float x,float y, float[] out); 
+  void update();
+};
 
 class FlowField_centers implements FlowField{
   int np;
@@ -364,7 +367,7 @@ class FlowField_centers implements FlowField{
   
 }
 
-class Renderer_FlowField{
+class Renderer_FlowField implements MusicRenderer{
   int   np,nc;
   float [] xs;
   float [] ys;
@@ -420,9 +423,10 @@ class Renderer_FlowField{
   }
 
   void update(){
-    
+    ffc.update();
     updateCursors();
-    
+    if(frameCount%30==0){ fill(0,0,1,0.02); rect(0,0,width,height); }
+    strokeWeight(1); stroke(0.,0.05); 
     for(int itr=0; itr<perFrame; itr++){
     for(int i=0; i<np; i++){
       float x=xs[i];
@@ -443,5 +447,7 @@ class Renderer_FlowField{
     }
     }
   }
+  
+  void draw(){};
   
 }
