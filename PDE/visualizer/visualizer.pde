@@ -18,6 +18,32 @@
    * Kaleidoscope
    * Complex number fractal (Julia Sets)
 
+ * Fractal Colloring By Orbitraps - image-based orbitraps
+   * https://iquilezles.org/www/articles/ftrapsbitmap/ftrapsbitmap.htm
+   * https://iquilezles.org/www/articles/ftrapsgeometric/ftrapsgeometric.htm
+   * Procedural Orbitraps
+     * https://www.iquilezles.org/www/articles/ftrapsprocedural/ftrapsprocedural.htm
+   * Smooth Iteration Count
+     * https://www.shadertoy.com/view/MltXz2
+     * https://www.iquilezles.org/www/articles/mset_smooth/mset_smooth.htm
+   * Distance to Fractal 
+     * https://www.iquilezles.org/www/articles/distancefractals/distancefractals.htm
+     * https://www.shadertoy.com/view/lsX3W4
+     * https://www.shadertoy.com/view/Mss3R8
+   * Pop-Corn Images
+     * https://www.shadertoy.com/view/Mdl3RH
+     * https://www.shadertoy.com/view/Wss3zB
+     * https://www.shadertoy.com/view/wlsfRn
+     * https://www.iquilezles.org/www/articles/popcorns/popcorns.htm
+     
+     
+     
+   
+   
+  Inspiration 
+ =============
+ * Inigo Quilez
+   * Domain Wraping -  https://iquilezles.org/www/articles/warp/warp.htm
 
 */
 
@@ -62,6 +88,8 @@ Renderer_FlowField       renderFlow;
 
 FlowField_centers ffc;
 
+float freqMixRate = 0.02;
+
 float dt          = 0.025;
 float time        = 0;
 //float dt          = 1.0;
@@ -91,16 +119,19 @@ void settings() {
 void setup() {
   colorMode(HSB, 1.0);  
   ellipseMode(CENTER);
-  
-  //minim = new Minim(this);
-  //song = minim.loadFile("/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3");
-  //song = minim.loadFile("/media/prokop/LENOVO/hudba/Hallucinogen-G/LSD.mp3");
-  //fft = new FFT(song.bufferSize(), song.sampleRate());
-  
+    
   minim = new Minim(this);
   playlist = new PlayList();
   //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
   //playlist.addDirRecur( "D:\\hudba\\Basil Poledouris", 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G", 10);
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Luca Turilli"    , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic/-G"      , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic_forever" , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/EuropaUniversalis-ST" , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/HeartsOfIron-ST" , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Heroes of Might Magic 3 - ST" , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Hallucinogen-G"  , 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Basil Poledouris", 10 );
   
   beater = new BeatDetector();
@@ -141,8 +172,10 @@ void setup() {
   //stack.addScriptLine( "D : A" );
   //stack.addScriptLine( "main : A C noise" );
   
-  stack.addShader    ( "main", "Julia" );
-  stack.addScriptLine( "main :" );
+  //stack.addShader    ( "main", "Julia" );
+  stack.addShader      ( "main", "Julia_distance1" );
+  //stack.addShader    ( "main", "Julia_distance3" );
+  stack.addScriptLine  ( "main :" );
   
   stack.prepare();
  
@@ -154,18 +187,25 @@ void setup() {
 
 // ================= DRAW EACH FRAME
 
-void setupJulia(){
+void setupJulia_1(){
   DwShadertoy sh = stack.shaders.get("main");  
-  //sh.shader.uniform2f("Const", ydy[0], ydy[1] );
   float ph = frameCount*0.001;
   time += (0.0005 + pow(soundPower,0.3)*0.0003)*0.7; 
   ph=time;
-  //println( "ydy "+ ydy[0] +" "+ ydy[1] );
   float cx = sin(ph*1.9597)*0.3 + -0.80 + ydy[0]*0.015;
   float cy = cos(ph*1.1648)*0.3 + -0.15 + ydy[1]*0.015;
   //println( cx+" "+cy );
   sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
-  //sh.set_iMouse( cx, cy, cx, cy );
+}
+
+void setupJulia_2(){
+  DwShadertoy sh = stack.shaders.get("main");  
+  float ph = frameCount*0.001;
+  time += (0.0005 + pow(soundPower,0.3)*0.0003)*0.7; 
+  ph=time;
+  float cx = sin(ph*1.9597)*0.05 + -0.80 + ydy[0]*0.001;
+  float cy = cos(ph*1.1648)*0.1  + -0.2  - ydy[1]*0.005;
+  sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
 }
 
 void draw() {
@@ -176,34 +216,45 @@ void draw() {
   if(hold_skip){ song.skip( rewindStep ); }
   renderSpectrum.update();
      
-  /*   
+  
   //blendMode(REPLACE);
   //smooth(0); // WARRNING : !!!! Make sure smooth(0) is in  settings(); function !!!!!
-  setupJulia();
+  //setupJulia_1();
+  setupJulia_2();
   stack.time = frameCount * 0.01;
   stack.render(); ///  BIG RENDER HERE
-  */
+ 
   
   resetShader(); blendMode(BLEND);
   
   if(frameCount%30==0){ fill(0,0,1,0.02); rect(0,0,width,height); }
  
   //renderSpectrum.draw();
-  float done = song.position()/(float)song.length();  stroke(0,0,1,1); rect(0,0,width*done,5);
+  float done = song.position()/(float)song.length();  stroke(1,1,1,1); rect(0,height-10,width*done,height);
   //beater.bDraw=true;
   beater.update(soundPower);
   
-  
-  strokeWeight(1); stroke(0.,0.1); renderFlow.update();
-  ffc.update();
+  //strokeWeight(1); stroke(0.,0.05); renderFlow.update();
+  //ffc.update();
   
   //renderFission.update();
 
   
 }
 
+void mousePressed(){
+  if(mouseY>(height-10)){   
+    float f = (mouseX/(float)width); println( "cue to % "+ (100*f) );
+    song.cue( (int)( song.length()*f ) );
+  };
+}
+
 void keyPressed(){
+    // ToDo - use cue() to set position in song by mouse     http://code.compartmental.net/minim/audioplayer_method_cue.html
     if (keyCode == RIGHT ){ hold_skip = true; } 
+    //if (key == ' ' ){ song.cue(song.length()+1); playlist.nextSong(); } 
+    if (key == ' ' ){ song.skip(song.length()); playlist.nextSong(); } 
+    //if (key == ' ' ){  playlist.nextSong(); }
 }
 
 void keyReleased(){

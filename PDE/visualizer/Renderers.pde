@@ -24,7 +24,7 @@ class Renderer_Spectrum implements MusicRenderer{
   void update(){
     fft.forward(song.mix);
     soundPower = downSampleSpectrum( fft, freqs );
-    conv( freqs_smooth, freqs, 0.05 );
+    conv( freqs_smooth, freqs, freqMixRate );
     //linearFit(freqs_smooth, 2,15, ydy );
     linearFit2(freqs_smooth, 2,28, ydy );
   }
@@ -371,7 +371,7 @@ class Renderer_FlowField{
   float [] fxy;
   FlowField ffield;
   float dt = 1.0;
-  int perFrame = 100;
+  int perFrame = 200;
   float restartProb = 0.01;
   
   //float curX=width/2;
