@@ -59,7 +59,7 @@ void addImage( String name, String sInit ){
 
 void addShader( String name, String fpath ){
     String ss = "data/"+fpath+".glslf";
-    println( ss );
+    println( "addShader loading : " + ss );
     DwShadertoy sh = new DwShadertoy(context, ss );
     shaders.put( name, sh );
 }

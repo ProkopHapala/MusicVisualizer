@@ -79,9 +79,11 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
         
         //float d = Julia_dist( p, c );
         float d = Julia_dist( p, Const );
+        //float d = Julia_dist( p, Const + vec2(p.x*0.2*0,p.y*0.1) );
         
         //scol += sqrt( clamp( (150.0/zoom)*d, 0.0, 1.0 ) );
-        scol +=  clamp( pow( (1.0/zoom)*d, 0.25  ) , 0.0, 1.0 );
+        //scol +=  clamp( pow( (1.0/zoom)*d, 0.25  ) , 0.0, 1.0 );
+        scol +=  clamp( pow( 1.0*d, 0.25  ) , 0.0, 1.0 );
         //scol += pow( clamp( (150.0/zoom)*d, 0.0, 1.0 ), 1.0 ) * 1.0;
     }
     scol /= float(AA*AA);

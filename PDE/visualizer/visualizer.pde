@@ -79,6 +79,9 @@ RenderStack stack;
 PlayList     playlist;
 BeatDetector beater;
 
+VizualizerList visList;
+RulingClass    suzerain;
+
 Renderer_BondedBodyTree  renderBBT; 
 Renderer_RotTree         renderRT;
 MusicRenderer            render; 
@@ -119,10 +122,15 @@ void settings() {
 void setup() {
   colorMode(HSB, 1.0);  
   ellipseMode(CENTER);
+  context = new DwPixelFlow(this);
+  context.print();
+  context.printGL();
     
   minim = new Minim(this);
   playlist = new PlayList();
-  //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
+
+
+  
   //playlist.addDirRecur( "D:\\hudba\\Basil Poledouris", 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G", 10);
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Luca Turilli"    , 10 );
@@ -134,6 +142,11 @@ void setup() {
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Hallucinogen-G"  , 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Basil Poledouris", 10 );
   
+  //playlist.list.add( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G/Mindfields.mp3" );
+  //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
+  
+  
+  
   beater = new BeatDetector();
   beater.k1        = 0.3;
   beater.k2        = 0.03;
@@ -141,6 +154,20 @@ void setup() {
   
   renderSpectrum = new Renderer_Spectrum();
   
+  visList = new VizualizerList();
+  
+  Rulez_JuliaLike jl; 
+  jl = new Rulez_JuliaLike("","Julia"                  );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Julia_distance1"        );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","RotationalFractal"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","FractalLinesOfSymmetry" );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Kaleidoscope3"          );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","HyperbolicSquare"         );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
+  visList.next();
+    
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
   renderFission = new Renderer_ParticleFission(1024);
@@ -153,9 +180,7 @@ void setup() {
   //ffc.set( 0,  400,400, -1000.0, 0.0, 0.0 );
   //ffc.set( 1,  600,600, 0.0, 0.0, 100.0 );
   
-  context = new DwPixelFlow(this);
-  context.print();
-  context.printGL();
+
     
   stack = new RenderStack( width, height, context );
   
@@ -172,12 +197,17 @@ void setup() {
   //stack.addScriptLine( "D : A" );
   //stack.addScriptLine( "main : A C noise" );
   
+  /*
   //stack.addShader    ( "main", "Julia" );
-  stack.addShader      ( "main", "Julia_distance1" );
+  //stack.addShader      ( "main", "Julia_distance1" );
   //stack.addShader    ( "main", "Julia_distance3" );
+  //stack.addShader    ( "main", "RationalFractal" );
+  //stack.addShader    ( "main", "PersianCarpet" );
+  stack.addShader    ( "main", "FractalLinesOfSymmetry" );
+  //stack.addShader    ( "main", "Kaleidoscope3" );
   stack.addScriptLine  ( "main :" );
-  
   stack.prepare();
+  */
  
   //song.play(0);
   playlist.nextSong();
@@ -205,8 +235,10 @@ void setupJulia_2(){
   ph=time;
   float cx = sin(ph*1.9597)*0.05 + -0.80 + ydy[0]*0.001;
   float cy = cos(ph*1.1648)*0.1  + -0.2  - ydy[1]*0.005;
+  println( "Cxy "+cx+" "+cy );
   sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
 }
+
 
 void draw() {
   song = playlist.song;
@@ -216,15 +248,17 @@ void draw() {
   if(hold_skip){ song.skip( rewindStep ); }
   renderSpectrum.update();
      
-  
+  /*
   //blendMode(REPLACE);
   //smooth(0); // WARRNING : !!!! Make sure smooth(0) is in  settings(); function !!!!!
   //setupJulia_1();
   setupJulia_2();
   stack.time = frameCount * 0.01;
   stack.render(); ///  BIG RENDER HERE
+  */
  
-  
+  visList.draw();
+ 
   resetShader(); blendMode(BLEND);
   
   if(frameCount%30==0){ fill(0,0,1,0.02); rect(0,0,width,height); }
@@ -252,6 +286,7 @@ void mousePressed(){
 void keyPressed(){
     // ToDo - use cue() to set position in song by mouse     http://code.compartmental.net/minim/audioplayer_method_cue.html
     if (keyCode == RIGHT ){ hold_skip = true; } 
+    if (keyCode == ENTER ){ visList.next();   } 
     //if (key == ' ' ){ song.cue(song.length()+1); playlist.nextSong(); } 
     if (key == ' ' ){ song.skip(song.length()); playlist.nextSong(); } 
     //if (key == ' ' ){  playlist.nextSong(); }
