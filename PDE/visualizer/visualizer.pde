@@ -117,7 +117,7 @@ boolean hold_skip = false;
 
 void settings() {
   fullScreen(P2D);
-  //size(800, 800, P2D);
+  size(800, 800, P2D);
   smooth(0);    // WARRNING : !!!! Make sure smooth(0) is required for proper function of pixelFlow library and RenderStack
   //smooth(8);  // This Breaks 
 }
@@ -155,7 +155,8 @@ void setup() {
   
   visList = new VizualizerList();
   
-  Rulez_JuliaLike jl; 
+  Rulez_JuliaLike jl;                               
+  jl = new Rulez_JuliaLike("","AngelicMandelbrot"      );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Julia"                  );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Julia_distance1"        );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","RotationalFractal"      );  visList.rules.add(jl);
@@ -165,7 +166,6 @@ void setup() {
   jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
-  
 
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
@@ -183,7 +183,6 @@ void setup() {
   Rulez_JustRenderer jr; 
   jr = new Rulez_JustRenderer( "FlowField",       renderFlow    );   visList.rules.add(jr);
   jr = new Rulez_JustRenderer( "ParticleFission", renderFission );   visList.rules.add(jr);
-  
  
   stack = new RenderStack( width, height, context );
   
