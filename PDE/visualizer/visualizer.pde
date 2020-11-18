@@ -89,6 +89,7 @@ Renderer_RotTree         renderRT;
 Renderer_ParticleFission renderFission;
 Renderer_Spectrum        renderSpectrum;
 Renderer_FlowField       renderFlow;
+Renderer_SpectralChains  renderChains;
 
 FlowField_centers ffc;
 
@@ -106,6 +107,7 @@ float qSpread = 0.7;
 float qConv   = 0.5;
 float mMargin = 0.3;
 
+boolean bParticleDraw = true;
 boolean bDraw       = true;
 boolean bHUD        = true;
 boolean bDEBUG_DRAW = false; 
@@ -154,20 +156,19 @@ void setup() {
   renderSpectrum = new Renderer_Spectrum();
   
   visList = new VizualizerList();
-  
+  visList.bShuffle = false;
   
   Rulez_JuliaLike jl;                               
-  //jl = new Rulez_JuliaLike("","AngelicMandelbrot"      );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","Julia"                  );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","Julia_distance1"        );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","RotationalFractal"      );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","FractalLinesOfSymmetry" );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","Kaleidoscope3"          );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","HyperbolicSquare"         );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
-  //jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
-  
+  jl = new Rulez_JuliaLike("","AngelicMandelbrot"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Julia"                  );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Julia_distance1"        );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","RotationalFractal"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","FractalLinesOfSymmetry" );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Kaleidoscope3"          );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","HyperbolicSquare"         );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
   
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
@@ -181,10 +182,13 @@ void setup() {
   //ffc.set( 0,  400,400, -1000.0, 0.0, 0.0 );
   //ffc.set( 1,  600,600, 0.0, 0.0, 100.0 );
   
+  renderChains = new Renderer_SpectralChains( freqs.length, 16 );
   
   Rulez_JustRenderer jr; 
   jr = new Rulez_JustRenderer( "FlowField",       renderFlow    );   visList.rules.add(jr);
-  //jr = new Rulez_JustRenderer( "ParticleFission", renderFission );   visList.rules.add(jr);
+  jr = new Rulez_JustRenderer( "ParticleFission", renderFission );   visList.rules.add(jr);
+  jr = new Rulez_JustRenderer( "spectralChains" , renderChains  );   visList.rules.add(jr);
+  
  
   stack = new RenderStack( width, height, context );
   
@@ -287,7 +291,7 @@ void draw() {
     //stroke(0,1,1,1);
     noStroke();
     fill(0,1);
-    rect( 50,0,600,30);
+    rect( 50,0,800,30);
     fill(1,1);
     //textSize(8);
     text( "Song:        "+playlist.getName(), 50, 15 );
@@ -310,7 +314,8 @@ void keyPressed(){
     if (keyCode == ENTER ){ visList.next();   } 
     if (key=='`'){ bDEBUG_DRAW=!bDEBUG_DRAW; } 
     //if (key == ' ' ){ song.cue(song.length()+1); playlist.nextSong(); } 
-    if (key == ' ' ){ song.skip(song.length()); playlist.nextSong(); } 
+    //if (key == ' ' ){ song.skip(song.length()); playlist.nextSong(); } 
+    if (key == ' ' ){ playlist.nextSong(); } 
     //if (key == ' ' ){  playlist.nextSong(); }
 }
 

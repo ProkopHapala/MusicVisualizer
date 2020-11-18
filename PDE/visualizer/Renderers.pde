@@ -2,6 +2,7 @@
 // There Should be different classes of Software Renderes which react to music (which are not using GLSL shader)
 
 interface MusicRenderer{
+  void start ();
   void update();
   void draw  ();
 }
@@ -47,6 +48,7 @@ class Renderer_Spectrum implements MusicRenderer{
     line  ( 0, y0, 32*scx, y0 );
   }
   
+  void start(){};
 }
 
 // ========== Renderer Particle Kinematic Rotation Tree 2D 
@@ -86,7 +88,7 @@ class Renderer_RotTree implements MusicRenderer{
     ps.add( p );
     makeTree( p, level, L );
   }
-  
+  void start(){};
 }
 
 
@@ -184,7 +186,7 @@ class Renderer_BondedBodyTree implements MusicRenderer{
   void drawParticles(){
     for(Particle p : particles ){ p.draw();          }
   }
-
+  void start(){};
   
 }
 
@@ -219,17 +221,21 @@ class Renderer_ParticleFission implements MusicRenderer{
       np++;
     }
   }
-
-  //void update( float dt, float time, float [] freqs ){ 
-  void update(){ 
-   if(beater.bJustBeat){
+  void start(){
      //background(1.);
      //fill( 1.0, 0.3 );
      fill( 1.0, 0.5 );
      //fill( 1.0, 1.0 );
-     rect(0,0,width,height);
-     start(2,width/2,height/2,150.0);
+    rect(0,0,width,height);
+    start(2,width/2,height/2,150.0); 
+  };
+
+  //void update( float dt, float time, float [] freqs ){ 
+  void update(){ 
+   if(beater.bJustBeat){
+     start();
    } 
+   bParticleDraw = true;
    //smooth();
    strokeWeight(1);
    stroke(0,0,0,1);
@@ -242,6 +248,8 @@ class Renderer_ParticleFission implements MusicRenderer{
        float v2 = p.speed2();
        if( (v2<1) || (v2>1000000) ){ ps[i]=null; continue;  }
        p.magnetic( 0.,0.,1. );
+       stroke( 0, p.m*5.0 );
+       strokeWeight( 1+p.m*8.0 );
        p.update  ( dt );
        if( (np<npMax) && (random(1.)<(fissionProb*p.m)) ){
          ps[np] = p.fission( random(qSpread,-qSpread)-p.q*qConv, random(mMargin,1-mMargin) );
@@ -257,6 +265,126 @@ class Renderer_ParticleFission implements MusicRenderer{
   }
   
 }
+
+// ============== Spectral Chain
+
+class Renderer_SpectralChains implements MusicRenderer{
+  int nx,ny;
+  Particle [][] ps;
+  float  K    = 300.0;
+  float  Lx   = 20.0;
+  float  Ly   = 20.0;
+  float  kick = 2500.0;
+  float x0 = 100;
+  float y0 = 100;
+  float G =  100.0;
+  
+  Renderer_SpectralChains( int nx_, int ny_ ){
+    nx=nx_; ny=ny_;
+    ps = new Particle[nx][ny];
+    for(int i=0; i<nx; i++){
+      //ps[i] = 
+      for(int j=0; j<ny; j++){
+        ps[i][j] = new Particle();
+      }
+    }
+  }
+  
+  void start(){
+    fill( 1.0, 1.0 );rect(0,0,width,height);
+    Lx = (width-2*x0)/nx;
+    Ly = (height-2*y0)/ny;
+    kick = 150*Lx;
+    for(int i=0; i<nx; i++){
+      for(int j=0; j<ny; j++){
+        Particle p = ps[i][j];
+        p.m=1.0;
+        p.q=0.0;
+        p.x=x0+i*Lx; 
+        p.y=y0+j*Ly;
+        println( "p["+i+","+j+"] "+p.x+" "+p.y );
+        p.vx=0;
+        p.vy=0;
+      }
+    }
+  }
+
+  //void update( float dt, float time, float [] freqs ){ 
+  void update(){ 
+    float dN = 0.8/nx;
+    friction = 0.0;
+    //dt = 0.0000000001;
+    bParticleDraw = false;
+    //fill( 1.0, 1.0 );rect(0,0,width,height);
+    fill( 1.0, 0.05 );rect(0,0,width,height);
+    for(int i=0; i<nx; i++){ Particle [] pis = ps[i]; for(int j=0; j<ny; j++){ pis[j].clearForce(); } }
+    for(int i=0; i<nx; i++){
+      Particle [] pis = ps[i];
+      for(int j=0; j<ny; j++){
+        Particle p = pis[j];
+        if(j>0){
+          Particle op = pis[j-1];
+          p.fy += G*p.m;
+          float dx = p.x-op.x;
+          float dy = p.y-op.y;
+          float dz = p.z-op.z;
+          float r2 = dx*dx + dy*dy + dz*dz;
+          float cV = dx*p.vx + dy*p.vy + dz*p.vz;
+          float cF = dx*p.fx + dy*p.fy + dz*p.fz;
+          float ir2 = 1/r2;
+          float ir  = sqrt(ir2); // ToDo - we can do some Taylor approx to get rid of sqrt()
+          float sr = (Ly*ir-1);
+          p.x  += dx*sr;
+          p.y  += dy*sr;
+          p.z  += dz*sr;
+          //cV *=-ir/sqrt(p.vx*p.vx + p.vy*p.vy + p.vz*p.vz);
+          //float sV = sqrt(1-cV*cV);
+          float aV = atan( p.vx/p.vy );
+          //p.vx  += dx*cV;
+          //p.vy  += dy*cV;
+          //p.vz  += dz*cV;
+          cF *=-ir2;
+          p.fx  += dx*cF;
+          p.fy  += dy*cF;
+          p.fz  += dz*cF;
+          
+          p.update(dt);
+          
+          float sv = 10.0;
+          float sf = 10.0;
+          stroke(i*dN,1,0.3+abs(aV)*10.0,0.5);
+          strokeWeight(3); 
+          //point(p.x,p.y,p.z);
+          line(p.x,p.y,p.z, op.x,op.y,op.z);
+          /*
+          stroke(0.7,1,1,1);
+          line(p.x,p.y,p.z, p.x+p.vx*sv,p.y+p.vy*sv,p.z+p.vz*sv);
+          stroke(0.0,1,1,1);
+          line(p.x,p.y,p.z, p.x+p.fx*sf,p.y+p.fy*sf,p.z+p.fz*sf);
+          */
+        }else{
+          float xi0 = x0 + i*Lx;
+          p.vx = 0.999;
+          p.vy = 0.999;
+          p.fx += -K*(p.x-xi0) + sqrt(freqs[i])*kick;
+          p.fy += -K*(p.y-y0);
+          p.update(dt);
+        }
+        //strokeWeight(3); point(p.x,p.y);
+        //println( "p["+i+","+j+"] "+p.x+" "+p.y );
+        
+      }
+    }
+  }
+  
+  void draw(){
+   //strokeWeight(1); stroke(0,255,150,50); drawParticles();
+   //strokeWeight(1); stroke(50,150,150,15);   drawBonds();
+  }
+  
+}
+
+
 
 // ============== Spectral Tree
 
@@ -298,6 +426,7 @@ void branch( int level, float s, float ds, float x0, float y0, float ux, float u
    //strokeWeight(1); stroke(0,255,150,50); drawParticles();
    //strokeWeight(1); stroke(50,150,150,15);   drawBonds();
   }
+  void start(){};
 
 }
 
@@ -364,6 +493,7 @@ class FlowField_centers implements FlowField{
        for(int i=0; i<ffc.np; i++){ ffc.xs[i] = random(100,width-100); ffc.ys[i] = random(100,height-100);  };
      } 
   }
+    void start(){};
   
 }
 
@@ -467,5 +597,6 @@ class Renderer_FlowField implements MusicRenderer{
       ellipse( curXs[i], curYs[i], curWs[i], curWs[i] );
     }
   };
+  void start(){};
   
 }

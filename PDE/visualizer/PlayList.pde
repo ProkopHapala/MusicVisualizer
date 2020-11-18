@@ -33,6 +33,12 @@ void addDirRecur( String path, int level ){
 
 void nextSong(){
   int n = list.size();
+  // see https://forum.processing.org/two/discussion/16413/minim-pause-does-not-work
+  if(song!=null){
+    song.pause();
+    song.close();
+  }
+  //for (final ddf.minim.AudioSource s : songs)  s.close();
   if(bShuffle){
     songIndex = (int)random(n);
   }else{

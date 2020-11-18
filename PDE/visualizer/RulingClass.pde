@@ -78,7 +78,8 @@ class Rulez_JustRenderer implements RulingClass{
     name = name_;
   }
   void start(){
-    beater.bJustBeat  = true;
+    //beater.bJustBeat  = true;
+    renderer.start();
     renderer.update();
     fill(0,0,1,1); rect(0,0,width,height);
   }

@@ -102,8 +102,8 @@ class Particle{
     float x_=x+vx*dt;
     float y_=y+vy*dt;
     float z_=z+vz*dt;
-    if(bDraw){
-      stroke( 0, m*3.0 );
+    if(bParticleDraw){
+      //stroke( 0, m*3.0 );
       //println( "p "+x+" "+y+" "+z+" p_ "+x_+" "+y_+" "+z_+" v "+vx+" "+vy+" "+vz );
       line(x,y,z, x_,y_,z_ );
     }
