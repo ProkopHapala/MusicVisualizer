@@ -403,20 +403,22 @@ class Renderer_FlowField implements MusicRenderer{
   }
 
   void updateCursors(){
+    float width_ = width*0.7;
     for(int i=0; i<nc; i++){
       //float speed = 10;
       float speed = freqs[i];
       //curWs[i] = 10.0/(0.1+freqs_smooth[i]);
       //curWs[i] = 2.0 + freqs_smooth[i]*0.1;
-      curWs[i] = 2.0;
+      curWs[i] = 2.0 + sqrt(freqs[i])*2.0;
+      //curWs[i] = 2.0;
       float x = curXs[i];
       float y = curYs[i];
       x += random(-1.,1.)*speed;
       y += random(-1.,1.)*speed;
-      if(x<0     )x+=width;
-      if(x>width )x-=width;
-      if(x<0     )x+=height;
-      if(x>height)x-=height;
+      if(x<0     )x+=width_;
+      if(x>width_)x-=width_;
+      if(y<0     )y+=height;
+      if(y>height)y-=height;
       curXs[i]=x;
       curYs[i]=y;
     }
@@ -432,22 +434,38 @@ class Renderer_FlowField implements MusicRenderer{
       float x=xs[i];
       float y=ys[i];
       //if( (x>width)||(x<0)||(y>height)||(y<0) ){ x=5;y=random(5,height-5); }     
-      if(restartProb>random(1.)){ 
+      
+      int   icur = (int)((i*2654435769L)%nc);
+      float vol = freqs[icur];
+      if( (0.3+vol*0.05)*restartProb >random(1.)){ 
+      //if( (0.3+5.5/vol)*restartProb >random(1.)){ 
         //x=random(5,width-5);y=random(5,height-5);
-        int icur = (int)((i*2654435769L)%nc);
+        //int icur = (int)((i*2654435769L)%nc);
         float curWidth = curWs[icur];
+        //float curWidth = vol*10.2;
         x=curXs[icur]+random(-curWidth,curWidth);y=curYs[icur]+random(-curWidth,curWidth);
       } 
       ffield.eval(x,y,fxy);
       float x_ = x + fxy[0]*dt;
       float y_ = y + fxy[1]*dt;
-      if(bDraw){ line(x,y,x_,y_); }
+      if(bDraw){
+        stroke( 0, 0.05 + vol*0.001 );
+        line(x,y,x_,y_); 
+      }
       xs[i]=x_;
       ys[i]=y_;
     }
     }
+    if( bDEBUG_DRAW ) draw();
   }
   
-  void draw(){};
+  void draw(){
+    strokeWeight(1);
+    noFill();
+    stroke(0,1,1,1);
+    for(int i=0; i<nc; i++){
+      ellipse( curXs[i], curYs[i], curWs[i], curWs[i] );
+    }
+  };
   
 }
