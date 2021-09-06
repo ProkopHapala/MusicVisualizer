@@ -223,6 +223,15 @@ int tryreflect(inout vec2 z, vec2 norm) {
   }
 }
 
+vec3 texture_func(vec2 uv, vec3 w){
+    vec2 d; 
+    d=uv-vec2(0.0,0.0); float r = dot(d,d)-1.0;
+    d=uv-vec2(1.0,0.0); float g = dot(d,d)-0.5;
+    d=uv-vec2(0.0,1.0); float b = dot(d,d)-1.5;
+    vec3 v = vec3(r,g,b);
+    return 1./(1.+v*v/(w*w));
+}
+
 vec2 translate(vec2 z, float radius, float s) {
   // Do hyperbolic translation, ie. an inversion
   // Translate s (on x axis) to origin of hyperbolic disk with
@@ -332,6 +341,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
   // Adding a sub-pixel offset seems to reduce edge artefacts.
   vec2 z = (2.0*fragCoord + 0.35 - iResolution.xy)/iResolution.y;
+
+    vec2 uv = z; 
 
   if (display == 1) {
     z = cdiv(z,vec2(1,1));
@@ -444,8 +455,11 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
   //vec4 texColor = texture(iChannel0, z);
   
-  vec3 col = cos( vec3(z.x*1.5,(z.x+z.y)*0.5,z.y*1.5) ) *  sin( vec3(z.y*1.5,(z.x-z.y)*0.5,z.x*1.5) );
-  col *= sin( T2 * vec3(7,9,13)*0.1 );
+  //vec3 col = cos( vec3(z.x*1.5,(z.x+z.y)*0.5,z.y*1.5) ) *  sin( vec3(z.y*1.5,(z.x-z.y)*0.5,z.x*1.5) );
+  //col *= sin( T2 * vec3(7,9,13)*0.1 );
+
+  //vec3 col = texture_func(uv,vec3(0.2));
+  vec3 col = texture_func(z,vec3(0.2));
   vec4 texColor = vec4(col,1.0);
   
   fragColor = vec4(fade*texColor.xyz,1.0);

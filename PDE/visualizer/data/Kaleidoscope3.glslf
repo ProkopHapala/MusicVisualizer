@@ -29,6 +29,15 @@ uniform vec2 Const;
 
 const float tau = 6.2831853;
 
+vec3 texture_func(vec2 uv, vec3 w){
+    vec2 d; 
+    d=uv-vec2(0.0,0.0); float r = dot(d,d)-1.0;
+    d=uv-vec2(1.0,0.0); float g = dot(d,d)-0.5;
+    d=uv-vec2(0.0,1.0); float b = dot(d,d)-1.5;
+    vec3 v = vec3(r,g,b);
+    return 1./(1.+v*v/(w*w));
+}
+
 void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     //float T = iTime*.3+10.0;
     float T  = 100.0 + Const.y*80.0 + iTime*0.1;
@@ -36,6 +45,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     
     vec2 uv = (fragCoord.xy-.5*iResolution.xy) * 8.0 / iResolution.y;
 
+    
     float r = 1.0;
     
     float a = T*.1;
@@ -59,12 +69,18 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     }
         
     //fragColor = .5+.5*sin(T+vec4(13,17,23,1)*texture( iChannel0, uv*vec2(1,-1)+.5, -0.0 ));
-    vec3 col = cos( vec3(uv.x*1.5,(uv.x+uv.y)*0.5,uv.y*1.5) ) *  sin( vec3(uv.y*1.5,(uv.x-uv.y)*0.5,uv.x*1.5) );
+    //vec3 col = cos( vec3(uv.x*1.5,(uv.x+uv.y)*0.5,uv.y*1.5) ) *  sin( vec3(uv.y*1.5,(uv.x-uv.y)*0.5,uv.x*1.5) );
+
+    //vec3 col = vec3();
     //col*=col;
     //col *= sin( iTime * vec3(7,9,13)*0.1 );
-    col *= sin( T2 * vec3(7,9,13)*0.1 );
+    //col *= sin( T2 * vec3(7,9,13)*0.1 );
     //col*=col; col*=col; col*=col; col*=col;
-    fragColor = 0.5 + 1.5*vec4( col, 1.0 );
+    
+
+    //float c = texture_func(uv);
+    vec3 col = texture_func(uv,vec3(0.2));
+    fragColor = vec4( col, 1.0 );
     //fragColor = clamp( 0.5 + 1.5*vec4( col, 1.0 ), 0., 1.);
 }
 

@@ -151,11 +151,12 @@ void setup() {
   
   //playlist.addDirRecur( "/media/prokop/LENOVO/hudba/xXx-G-ST", 10 );
   
-  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic/-G"      , 10 );
-  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic_forever" , 10 );
+  //playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic/-G"      , 10 );
+  //playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic_forever" , 10 );
   
   //playlist.list.add( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G/Mindfields.mp3" );
-  //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
+  playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
+  playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/Psychedelic-LanaB-BlackOctopus.mp3" );
   
   beater = new BeatDetector();
   beater.k1        = 0.3;
@@ -167,7 +168,8 @@ void setup() {
   visList = new VizualizerList();
   visList.bShuffle = false;
   
-  Rulez_JuliaLike jl;     
+  Rulez_JuliaLike jl;
+  
   jl = new Rulez_JuliaLike("","Kali2"      );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","GrinningFractal"      );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","MandelbrotPatternDecoration"      );  visList.rules.add(jl);
@@ -190,6 +192,9 @@ void setup() {
   jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
   
   
+  //jl = new Rulez_JuliaLike("","HyperbolicSquare"         );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","Kaleidoscope3"          );  visList.rules.add(jl);
+  
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
   renderFission = new Renderer_ParticleFission(1024);
@@ -203,12 +208,12 @@ void setup() {
   //ffc.set( 1,  600,600, 0.0, 0.0, 100.0 );
   
   renderChains = new Renderer_SpectralChains( freqs.length, 16 );
-  
+  /*
   Rulez_JustRenderer jr; 
   jr = new Rulez_JustRenderer( "FlowField",       renderFlow    );   visList.rules.add(jr);
   jr = new Rulez_JustRenderer( "ParticleFission", renderFission );   visList.rules.add(jr);
   jr = new Rulez_JustRenderer( "spectralChains" , renderChains  );   visList.rules.add(jr);
-  
+  */
  
   stack = new RenderStack( width, height, context );
   
