@@ -133,7 +133,10 @@ vec3 fractal(vec2 p, vec2 C ) {
 
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
-	vec2 p = ((fragCoord.xy / iResolution.xy) - 0.5)*4.0;
+    vec2 p = ((fragCoord.xy / iResolution.xy) - 0.5)*4.0;
+    fragColor = vec4(sin(p),0.0,1.0);
+    
+    /*
     p.y -= 1.0;
     //p.x *= iResolution.x/iResolution.y;
     //vec2 mouse = vec2(iMouse.x/iResolution.x,iMouse.y/iResolution.y);
@@ -149,7 +152,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     
     
     fragColor = vec4( pow(c,vec3(0.8)),1.0);
-
+    */
 }
 
 

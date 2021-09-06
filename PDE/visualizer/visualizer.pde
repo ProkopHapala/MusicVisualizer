@@ -1,4 +1,4 @@
-
+ 
 /*
 
   ToDo
@@ -134,6 +134,7 @@ void setup() {
   minim = new Minim(this);
   playlist = new PlayList();
 
+/*
   //playlist.addDirRecur( "D:\\hudba\\Basil Poledouris", 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G", 10);
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Luca Turilli"    , 10 );
@@ -144,6 +145,14 @@ void setup() {
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Heroes of Might Magic 3 - ST" , 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Hallucinogen-G"  , 10 );
   playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Basil Poledouris", 10 );
+  */
+  
+  //playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Ramstein", 10 );
+  
+  //playlist.addDirRecur( "/media/prokop/LENOVO/hudba/xXx-G-ST", 10 );
+  
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic/-G"      , 10 );
+  playlist.addDirRecur( "/media/prokop/LENOVO/hudba/Classic_forever" , 10 );
   
   //playlist.list.add( "/media/prokop/LENOVO/hudba/Prodigy - The Eat Of The Land-G/Mindfields.mp3" );
   //playlist.list.add( "/home/prokop/git/MusicVisualizer/resources/BoxCat_Games_10_Epic_Song.mp3" );
@@ -158,8 +167,18 @@ void setup() {
   visList = new VizualizerList();
   visList.bShuffle = false;
   
-  Rulez_JuliaLike jl;                               
-  jl = new Rulez_JuliaLike("","AngelicMandelbrot"      );  visList.rules.add(jl);
+  Rulez_JuliaLike jl;     
+  jl = new Rulez_JuliaLike("","Kali2"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","GrinningFractal"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","MandelbrotPatternDecoration"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","Apolonian"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","FractalPulse"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","MandalaStarPattern"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","InversiveKaleidoscope2"      );  visList.rules.add(jl);
+  jl = new Rulez_JuliaLike("","MultiplicationTablesMandalas"      );  visList.rules.add(jl);
+  
+  //jl = new Rulez_JuliaLike("","AngelicMandelbrot"      );  visList.rules.add(jl);
+  
   jl = new Rulez_JuliaLike("","Julia"                  );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Julia_distance1"        );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","RotationalFractal"      );  visList.rules.add(jl);
@@ -169,6 +188,7 @@ void setup() {
   jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
+  
   
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
   //renderRT  = new Renderer_RotTree       ( 2, 200.0 ); render = renderRT;
@@ -226,6 +246,7 @@ void setup() {
 
 // ================= DRAW EACH FRAME
 
+/*
 void setupJulia_1(){
   DwShadertoy sh = stack.shaders.get("main");  
   float ph = frameCount*0.001;
@@ -233,7 +254,7 @@ void setupJulia_1(){
   ph=time;
   float cx = sin(ph*1.9597)*0.3 + -0.80 + ydy[0]*0.015;
   float cy = cos(ph*1.1648)*0.3 + -0.15 + ydy[1]*0.015;
-  //println( cx+" "+cy );
+  println( " ==== Cx Cy "+cx+" "+cy );
   sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
 }
 
@@ -247,7 +268,7 @@ void setupJulia_2(){
   println( "Cxy "+cx+" "+cy );
   sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
 }
-
+*/
 
 void draw() {
   song = playlist.song;
@@ -294,7 +315,7 @@ void draw() {
     rect( 50,0,800,30);
     fill(1,1);
     //textSize(8);
-    text( "Song:        "+playlist.getName(), 50, 15 );
+    text( "Song:       "+playlist.getName(), 50, 15 );
     text( "Visualizer: "+visList .getName(), 50, 27 );
   }
   
