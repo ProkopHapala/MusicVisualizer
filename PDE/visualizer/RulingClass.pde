@@ -50,6 +50,9 @@ class Rulez_JuliaLike implements RulingClass{
     float cx = cx0 + sin(time*cxTimeFreq)*cxTimeAmp + ydy[0]*cxVol;
     float cy = cy0 + cos(time*cyTimeFreq)*cyTimeAmp + ydy[1]*cyVol;
     //println( nickName+" "+shaderName+" Cxy "+cx+" "+cy );
+    
+    global_Cx = cx;
+    global_Cy = cy;
     sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
   };
   void start(){

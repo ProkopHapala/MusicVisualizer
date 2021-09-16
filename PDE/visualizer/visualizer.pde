@@ -115,6 +115,10 @@ boolean bDEBUG_DRAW = false;
 boolean hold_skip = false;
 
 
+
+float global_Cx = 0;
+float global_Cy = 0;
+
 // ================= INITIALIZE PROGRAM
 
 void settings() {
@@ -168,6 +172,8 @@ void setup() {
   visList.bShuffle = false;
   
   Rulez_JuliaLike jl;     
+  jl = new Rulez_JuliaLike("","TripToSamarkand"                  );  visList.rules.add(jl);
+  /*
   jl = new Rulez_JuliaLike("","Kali2"      );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","GrinningFractal"      );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","MandelbrotPatternDecoration"      );  visList.rules.add(jl);
@@ -188,6 +194,7 @@ void setup() {
   jl = new Rulez_JuliaLike("","HyperbolicPoincareWeave"  );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","HyperbolicTruchetTiles"   );  visList.rules.add(jl);
   jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
+  */
   
   
   //renderBBT = new Renderer_BondedBodyTree( 2, 300.0 ); render = renderBBT;
@@ -204,11 +211,12 @@ void setup() {
   
   renderChains = new Renderer_SpectralChains( freqs.length, 16 );
   
+  /*
   Rulez_JustRenderer jr; 
   jr = new Rulez_JustRenderer( "FlowField",       renderFlow    );   visList.rules.add(jr);
   jr = new Rulez_JustRenderer( "ParticleFission", renderFission );   visList.rules.add(jr);
   jr = new Rulez_JustRenderer( "spectralChains" , renderChains  );   visList.rules.add(jr);
-  
+  */
  
   stack = new RenderStack( width, height, context );
   
@@ -317,6 +325,7 @@ void draw() {
     //textSize(8);
     text( "Song:       "+playlist.getName(), 50, 15 );
     text( "Visualizer: "+visList .getName(), 50, 27 );
+    text( "Const: "+global_Cx+" "+global_Cy, 50, 10 );
   }
   
 }
