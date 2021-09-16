@@ -27,6 +27,17 @@ uniform vec2 Const;
 
 const int iters = 64;
 
+vec2 cmul(vec2 a, vec2 b){  // Complex multiplication  https://en.wikipedia.org/wiki/Complex_number#Multiplication_and_square
+    return vec2( a.x*b.x - a.y*b.y,  
+                 a.x*b.y + a.y*b.x);
+}
+
+vec2 rotate( vec2 z, float angle){
+    vec2 cs = vec2(cos(angle),sin(angle));   // unitary complex number encode rotation 
+	return cmul(z, cs);                      // multiplication of z by unitary complex number rotate it in complex plane
+}
+
+
 vec3 fractal(vec2 c, vec2 c2) {
     vec2 z = c;
     float ci = 0.0;
@@ -48,14 +59,18 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     vec2 uv = fragCoord.xy - iResolution.xy*.5;
     uv /= iResolution.x;
     vec2 tuv = uv;
-    float rot=sin(iTime*0.02)*2.7;
-    uv.x = tuv.x*cos(rot)-tuv.y*sin(rot);
-    uv.y = tuv.x*sin(rot)+tuv.y*cos(rot);
+    uv = rotate( uv, sin(iTime*0.01 + Const.x*20. + Const.y*20.  )*2.7 );
     float t = iTime + 10.*Const.x;
-    float juliax = sin(t       ) * 0.01 + 0.2;
-    float juliay = cos(t * 0.23) * 0.02 + 5.7;
-    //fragColor = vec4( fractal(uv, vec2(juliax, juliay)) ,1.0);
-    fragColor = vec4( fractal(uv, (Const+vec2(+0.7,-0.0))*vec2(0.2,0.2) + vec2(juliax,juliay) ) ,1.0);
+    // generate constant C for Julia set from sin,cos of current time to make fractal Animate with time
+    float speed = 0.2;
+    float juliax = sin(iTime * 0.5 *speed ) * 0.02 + 0.2;
+	float juliay = cos(iTime * 0.13*speed ) * 0.04 + 5.7;
+     // or you ma also try to set fixed constant parameter 
+    //vec2 C = vec2(juliax, juliay);
+    vec2 C = (Const-vec2(-0.7 ,0.0 ))*vec2( 1.0,  1.0) + vec2(0.2+juliax,5.7+juliax);
+    //C = vec2(0.2,5.7-0.1);        
+	
+    fragColor = vec4( fractal(uv, C) ,1.0);
 }
 
 

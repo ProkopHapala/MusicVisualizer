@@ -109,8 +109,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     uv = rotate( uv, sin(iTime*0.01 + Const.x*20. + Const.y*20.  )*2.7 );
 	
     // generate constant C for Julia set from sin,cos of current time to make fractal Animate with time
-    float juliax = sin(iTime * 0.5    ) * 0.02 + 0.2;
-	float juliay = cos(iTime * 0.13) * 0.04 + 5.7;
+    float speed = 0.2;
+    float juliax = sin(iTime * 0.5 *speed ) * 0.02 + 0.2;
+	float juliay = cos(iTime * 0.13*speed ) * 0.04 + 5.7;
      // or you ma also try to set fixed constant parameter 
     //vec2 C = vec2(juliax, juliay);
     vec2 C = (Const-vec2(-0.7 ,0.0 ))*vec2( 1.0,  1.0) + vec2(0.2+juliax,5.7+juliax);
