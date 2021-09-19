@@ -115,6 +115,8 @@ boolean bDEBUG_DRAW = false;
 boolean hold_skip = false;
 
 
+PGraphics pg_debug;
+
 
 float global_Cx = 0;
 float global_Cy = 0;
@@ -129,6 +131,13 @@ void settings() {
 }
 
 void setup() {
+  
+  pg_debug = createGraphics(width, height);
+  pg_debug.beginDraw();
+  pg_debug.fill(1,1,1);
+  //pg_debug.ellipse(300, 300, 400, 400);
+  pg_debug.endDraw();
+  
   colorMode(HSB, 1.0);  
   ellipseMode(CENTER);
   context = new DwPixelFlow(this);
@@ -318,6 +327,8 @@ void draw() {
   if(bDEBUG_DRAW){
     beater.bDraw=true;
     renderSpectrum.draw();
+    drawSpectrumPix( pg_debug, fft, frameCount%width, 200, 1.0 );
+    image(pg_debug,0,0);
   }else{ beater.bDraw=false; }
   
   if(bHUD){

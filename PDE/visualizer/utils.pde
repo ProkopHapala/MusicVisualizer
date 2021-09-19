@@ -50,6 +50,18 @@ void drawSpectrum( FFT fft, float y0, float scy, float scx ){
   }
 }
 
+void drawSpectrumPix( PGraphics pg, FFT fft, int x0, int y0, float sc ){
+  float oy = fft.getBand(0);
+  pg.beginDraw();
+  for(int i = 1; i < fft.specSize(); i++){
+    float y = fft.getBand(i)*i;
+    pg.stroke( y*sc );
+    pg.point( x0, y0+i );
+    oy=y;
+  }
+  pg.endDraw();
+}
+
 void drawFreqs( float [] freqs, float y0, float scy, float scx ){
   float oy = fft.getBand(0);
   for(int i = 1; i < freqs.length; i++){
