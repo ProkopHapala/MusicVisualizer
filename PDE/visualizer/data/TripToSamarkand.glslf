@@ -23,9 +23,9 @@ uniform float iSampleRate;           // image/buffer/sound    The sound sample r
 uniform float iChannelTime[4];       // image/buffer          Time for channel (if video or sound), in seconds
 uniform vec3  iChannelResolution[4]; // image/buffer/sound    Input texture resolution for each channel
 
-
-uniform vec2 Const;
-
+uniform vec2  Const;
+uniform vec2  CamRot;
+uniform vec2  ColorShift;
 
 // This shader should be a tutorial how to animate simple fractal in order to explore possibilities use it for music visualization
 // everywere is used iTime can we can put filtered (e.g. smoothed) music-waveform to make it react on music
@@ -89,34 +89,38 @@ float fractal(vec2 z0, vec2 C) {
 
 // This generate color of pixel from calculated mean distance
 vec3 colorFunc( float mean ){
-	float ci = 1.0 - log2(.5*log2(mean/1.0));
-    float t  = iTime * 0.5 + Const.x*100. - Const.y*100.;   //  ANIMATION 3] time dependnet phase shift of color
+    float ci = 1.0 - log2(.5*log2(mean/1.0));
+    float freq = 6.0*ColorShift.y;
+    float t    = ColorShift.x;   //  ANIMATION 3] time dependnet phase shift of color
+    //float freq = 6.0;
+    //float t  = iTime * 0.5 + Const.x*100. - Const.y*100.;   //  ANIMATION 3] time dependnet phase shift of color
     return vec3(
-        0.5 + 0.5*cos( ci*6.0 + 0.0 + t),   // Red   - each color channel have different animation speed
-        0.5 + 0.5*cos( ci*6.0 + 0.4 + t),   // Green
-        0.5 + 0.5*cos( ci*6.0 + 0.8 + t*0.9)    // Blue
+        0.5 + 0.5*cos( ci*freq + 0.0 + t),   // Red   - each color channel have different animation speed
+        0.5 + 0.5*cos( ci*freq + 0.4 + t),   // Green
+        0.5 + 0.5*cos( ci*freq + 0.8 + t*0.9)    // Blue
     );
     //return cos( vec3(ci)*6.0 + vec3(0.0,0.4,0.7) )*0.5 + 0.5;
 }
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     //  map pixel position (fragCoord)  to interval -1.0 .. 1.0
-	vec2 uv = fragCoord.xy - iResolution.xy*.5; 
-	//uv /= 0.25*iResolution.x;
+    vec2 uv = fragCoord.xy - iResolution.xy*.5; 
+    //uv /= 0.25*iResolution.x;
     uv /= 0.4*iResolution.x;
     
     // rotate camera with time
-    uv = rotate( uv, sin(iTime*0.01 + Const.x*20. + Const.y*20.  )*2.7 );
-	
+    //uv = rotate( uv, sin(iTime*0.01 + Const.x*20. + Const.y*20.  )*2.7  );
+    uv = rotate( uv, CamRot.x+1.57079632679 )*CamRot.y;
+
     // generate constant C for Julia set from sin,cos of current time to make fractal Animate with time
     float speed = 0.2;
     float juliax = sin(iTime * 0.5 *speed ) * 0.02 + 0.2;
-	float juliay = cos(iTime * 0.13*speed ) * 0.04 + 5.7;
+    float juliay = cos(iTime * 0.13*speed ) * 0.04 + 5.7;
      // or you ma also try to set fixed constant parameter 
     //vec2 C = vec2(juliax, juliay);
     vec2 C = (Const-vec2(-0.7 ,0.0 ))*vec2( 1.0,  1.0) + vec2(0.2+juliax,5.7+juliax);
-    //C = vec2(0.2,5.7-0.1);        
-	
+    //C = vec2(0.2,5.7-0.1);
+
     float meanDist = fractal( uv, C );       // evaluate fractal 
     vec3  col      = colorFunc( meanDist );  // map the fractal mean-distance into color
     fragColor = vec4( col ,1.0);             // output to screen

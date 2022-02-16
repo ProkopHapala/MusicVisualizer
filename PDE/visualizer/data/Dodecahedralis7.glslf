@@ -23,8 +23,9 @@ uniform float iSampleRate;           // image/buffer/sound    The sound sample r
 uniform float iChannelTime[4];       // image/buffer          Time for channel (if video or sound), in seconds
 uniform vec3  iChannelResolution[4]; // image/buffer/sound    Input texture resolution for each channel
 
-uniform vec2 Const;
-
+uniform vec2  Const;
+uniform vec2  CamRot;
+uniform vec2  ColorShift;
 
 //  Dodecahedralis VII      https://www.shadertoy.com/view/wtXcDB
 
@@ -54,9 +55,37 @@ bool inside(in vec3 z, in vec2 c, in float r, inout float t) {
     return res < 0.0;
 }
 
+vec2 cmul(vec2 a, vec2 b){  // Complex multiplication  https://en.wikipedia.org/wiki/Complex_number#Multiplication_and_square
+    return vec2( a.x*b.x - a.y*b.y,  
+                 a.x*b.y + a.y*b.x);
+}
+
+vec2 rotate( vec2 z, float angle){
+    vec2 cs = vec2(cos(angle),sin(angle));   // unitary complex number encode rotation 
+	return cmul(z, cs);                      // multiplication of z by unitary complex number rotate it in complex plane
+}
+
+// This generate color of pixel from calculated mean distance
+vec3 colorFunc( float mean ){
+    float ci = 1.0 - log2(.5*log2(mean/1.0));
+    float freq = 6.0*ColorShift.y;
+    float t    = ColorShift.x;   //  ANIMATION 3] time dependnet phase shift of color
+    //float freq = 6.0;
+    //float t  = iTime * 0.5 + Const.x*100. - Const.y*100.;   //  ANIMATION 3] time dependnet phase shift of color
+    return vec3(
+        0.5 + 0.5*cos( ci*freq + 0.0 + t),   // Red   - each color channel have different animation speed
+        0.5 + 0.5*cos( ci*freq + 0.4 + t),   // Green
+        0.5 + 0.5*cos( ci*freq + 0.8 + t*0.9)    // Blue
+    );
+    //return cos( vec3(ci)*6.0 + vec3(0.0,0.4,0.7) )*0.5 + 0.5;
+}
+
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     vec2 z0 = 2.0 * (fragCoord - iResolution.xy * 0.5)/iResolution.y;
+    
+    z0 = rotate( z0, CamRot.x+1.57079632679 )*CamRot.y;
+    
     float ds = 1.0 / iResolution.y;
     vec3 z = vec3(z0,ds);
     
@@ -100,8 +129,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         signs[i  ] = int( fract(Const.x*(f0+i*fi))*2 +0.95)*2 - 1;
         signs[i+6] = int( fract(Const.y*(f0+i*fi))*2 +0.95)*2 - 1;
     }
-    
-    
     for (int i=0; i<7; i++) {
         
         fl1 = fl1 ^^ flip(z, c[0], r[0], s1, signs[0] );
@@ -146,11 +173,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     if (fl1) {s1=-s1;}
     if (fl2) {s2=-s2;}
     if (fl3) {s3=-s3;}
-    vec3 s = vec3(float(s1+s2+s3) + 4.0 * d / period);
     
+    /*
+    vec3 s = vec3(float(s1+s2+s3) + 4.0 * d / period);
     s = s / (1.9 + abs(s));
     vec3 col = 0.5 + s * 0.45;
     col.rg*=0.8;
+    */
+    
+    vec3 col=colorFunc( float(s1+s2+s3)*0.5 );
+    
     fragColor = vec4(col,1.0);
     fragColor = pow(fragColor, vec4(1.0/2.2));
 }

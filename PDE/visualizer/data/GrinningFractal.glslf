@@ -23,7 +23,9 @@ uniform float iSampleRate;           // image/buffer/sound    The sound sample r
 uniform float iChannelTime[4];       // image/buffer          Time for channel (if video or sound), in seconds
 uniform vec3  iChannelResolution[4]; // image/buffer/sound    Input texture resolution for each channel
 
-uniform vec2 Const;
+uniform vec2  Const;
+uniform vec2  CamRot;
+uniform vec2  ColorShift;
 
 const int iters = 64;
 
@@ -51,7 +53,11 @@ vec3 fractal(vec2 c, vec2 c2) {
     }
     mean/=float(62);
     ci =  1.0 - log2(.5*log2(mean/1.));
-    return vec3( .5+.5*cos(6.*ci+0.0),.5+.5*cos(6.*ci + 0.4),.5+.5*cos(6.*ci +0.7) );
+    ci*=6*ColorShift.y;
+    ci += ColorShift.x;
+    return vec3( .5+.5*cos(ci + 0.0  ),
+                 .5+.5*cos(ci + 0.4  ),
+                 .5+.5*cos(ci + 0.7  ) );
 }
 
 
@@ -59,7 +65,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     vec2 uv = fragCoord.xy - iResolution.xy*.5;
     uv /= iResolution.x;
     vec2 tuv = uv;
-    uv = rotate( uv, sin(iTime*0.01 + Const.x*20. + Const.y*20.  )*2.7 );
+    //uv = rotate( uv, sin(iTime*0.01 + Const.x*20. + Const.y*20.  )*2.7 );
+    uv = rotate( uv,  CamRot.x+1.57079632679 )*CamRot.y;
     float t = iTime + 10.*Const.x;
     // generate constant C for Julia set from sin,cos of current time to make fractal Animate with time
     float speed = 0.2;

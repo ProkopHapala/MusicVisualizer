@@ -1,6 +1,5 @@
  
 /*
-
   ToDo
 ========
  * Choose renderers by text script lines
@@ -36,10 +35,6 @@
      * https://www.shadertoy.com/view/wlsfRn
      * https://www.iquilezles.org/www/articles/popcorns/popcorns.htm
      
-     
-     
-   
-   
   Inspiration 
  =============
  * Inigo Quilez
@@ -218,14 +213,14 @@ void setup() {
   
   // =========== Prezentable
   jl = new Rulez_JuliaLike("","Dodecahedralis7" );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","GrinningFractal"   );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","Kali2"             );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","TripToSamarkand"   );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","MandelbrotPatternDecoration"      );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","FractalPulse"      );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","InversiveKaleidoscope2"      );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","FractalLinesOfSymmetry" );  visList.rules.add(jl);
-  jl = new Rulez_JuliaLike("","Kaleidoscope3"          );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","GrinningFractal"   );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","Kali2"             );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","TripToSamarkand"   );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","MandelbrotPatternDecoration"      );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","FractalPulse"      );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","InversiveKaleidoscope2"      );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","FractalLinesOfSymmetry" );  visList.rules.add(jl);
+  //jl = new Rulez_JuliaLike("","Kaleidoscope3"          );  visList.rules.add(jl);
 //jl = new Rulez_JuliaLike("","RotationalFractal"      );  visList.rules.add(jl);
 //jl = new Rulez_JuliaLike("","Apolonian"      );  visList.rules.add(jl);
   
@@ -297,38 +292,12 @@ void setup() {
     videoExport.startMovie();
   }
   
-  
-  
-  for(int i=0; i<sliders.length; i++){ sliders[i] = new Control( "label_"+i, 10,10+i*10, 0.2 , 1.8 ); }
-  
+  initControls();
+    
 }
 
 
 // ================= DRAW EACH FRAME
-
-/*
-void setupJulia_1(){
-  DwShadertoy sh = stack.shaders.get("main");  
-  float ph = frameCount*0.001;
-  time += (0.0005 + pow(soundPower,0.3)*0.0003)*0.7; 
-  ph=time;
-  float cx = sin(ph*1.9597)*0.3 + -0.80 + ydy[0]*0.015;
-  float cy = cos(ph*1.1648)*0.3 + -0.15 + ydy[1]*0.015;
-  println( " ==== Cx Cy "+cx+" "+cy );
-  sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
-}
-
-void setupJulia_2(){
-  DwShadertoy sh = stack.shaders.get("main");  
-  float ph = frameCount*0.001;
-  time += (0.0005 + pow(soundPower,0.3)*0.0003)*0.7; 
-  ph=time;
-  float cx = sin(ph*1.9597)*0.05 + -0.80 + ydy[0]*0.001;
-  float cy = cos(ph*1.1648)*0.1  + -0.2  - ydy[1]*0.005;
-  println( "Cxy "+cx+" "+cy );
-  sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
-}
-*/
 
 void draw() {
   song = playlist.song;
@@ -385,10 +354,13 @@ void draw() {
       if      (mouseButton == RIGHT){
         jl.mouseSet( (mouseX-(width/2))/scC, (mouseY-(height/2))/scC );
       }else if (mouseButton == LEFT){
-        line( mouseX,mouseY, px,py );
-        jl.mousePull( (mouseX-(width/2))/scC, (mouseY-(height/2))/scC );
+        if( !mouseControl( mouseX,mouseY ) ){
+          line( mouseX,mouseY, px,py );
+          jl.mousePull( (mouseX-(width/2))/scC, (mouseY-(height/2))/scC );
+        }
       }
     }
+    applyControls();
     
     float done = song.position()/(float)song.length();  stroke(1,1,1,1); rect(0,height-10,width*done,height);
     //stroke(0,1,1,1);
@@ -399,7 +371,7 @@ void draw() {
     //textSize(8);
     text( "Song:       "+playlist.getName(), 50, 15 );
     text( "Visualizer: "+visList .getName(), 50, 27 );
-    text( "Const: "+global_Cx+" "+global_Cy, 50, 40 );
+    //text( "Const: "+global_Cx+" "+global_Cy, 50, 40 );
   }
  
   if( bRecord ){

@@ -23,7 +23,9 @@ uniform float iSampleRate;           // image/buffer/sound    The sound sample r
 uniform float iChannelTime[4];       // image/buffer          Time for channel (if video or sound), in seconds
 uniform vec3  iChannelResolution[4]; // image/buffer/sound    Input texture resolution for each channel
 
-uniform vec2 Const;
+uniform vec2  Const;
+uniform vec2  CamRot;
+uniform vec2  ColorShift;
 
 //  Simple Kaleidoscope 3     From https://www.shadertoy.com/view/4tlGD2
 
@@ -32,8 +34,8 @@ const float tau = 6.2831853;
 vec3 texture_func(vec2 uv, vec3 w){
     vec2 d; 
     d=uv-vec2(0.0,0.0); float r = dot(d,d)-1.0;
-    d=uv-vec2(1.0,0.0); float g = dot(d,d)-0.5;
-    d=uv-vec2(0.0,1.0); float b = dot(d,d)-1.5;
+    d=uv-vec2(1.0,ColorShift.x*0.01); float g = dot(d,d)-0.5;
+    d=uv-vec2(ColorShift.x*0.01,1.0); float b = dot(d,d)-1.5 ;
     vec3 v = vec3(r,g,b);
     return 1./(1.+v*v/(w*w));
 }
@@ -79,7 +81,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
     
 
     //float c = texture_func(uv);
-    vec3 col = texture_func(uv,vec3(0.2));
+    //vec3 col = texture_func(uv,vec3(0.2));
+    vec3 col = texture_func(uv,vec3((1.+ColorShift.y)*0.1));
     fragColor = vec4( col, 1.0 );
     //fragColor = clamp( 0.5 + 1.5*vec4( col, 1.0 ), 0., 1.);
 }

@@ -1,41 +1,5 @@
 
-
-
-
-
-class Control{
-  String label; 
-  float x=0,y=0,w=100,h=10; // position and size on the screen
-  float v, vmin,vmax;
   
-  Control( String label_, float x_, float y_, float vmin_, float vmax_){
-    label=label_;
-    x=x_; y=y_; vmin=vmin_; vmax=vmax_;
-    v = (vmin+vmax)*0.5;
-  }
-  
-  void set(float mX, float mY){
-    if( (mX>x) && (mX<(x+w)) && (mY>y) && (mY<(y+h)) ){ 
-      //v = vmin + (vmax-vmin)* (mouseY-y)/h;
-      v = vmin + (vmax-vmin)* (mouseX-x)/w;
-    }
-  }
-  
-  void draw(){
-    
-    stroke(1);
-    noFill();
-    rect(x,y,x+w,y+h);
-    fill(1);
-    float f = (v-vmin)/(vmin-vmax);
-    rect(x,y,x+w*f,y+h);
-    text(label, x, y );
-  };
-  
-};
-
-Control[] sliders = new Control[10];
-
 interface RulingClass{
   void   start();
   void   draw();
@@ -43,6 +7,7 @@ interface RulingClass{
   String getName();
   void mousePull(float mX, float mY);
   void mouseSet(float mX, float mY);
+  int  getType();
 }
 
 class VizualizerList{
@@ -72,17 +37,17 @@ class Rulez_JuliaLike implements RulingClass{
   float timeRate0        = 0.0005*0.7;
   float timeRateVolume   = 0.0003*0.7;
   float timeRateVolPower = 0.3;
-  float cxTimeFreq = 1.9597;
-  float cyTimeFreq = 1.1648;
-  float cxTimeAmp = 0.5;
-  float cyTimeAmp = 1.0;
-  float cx0 = -0.80;
-  float cy0 = -0.2;
-  float cxVol =  0.1;
-  float cyVol = -0.5;
+  float cxTimeFreq       = 1.9597;
+  float cyTimeFreq       = 1.1648;
+  float cxTimeAmp        = 0.05;
+  float cyTimeAmp        = 0.1;
+  float cx0              = -0.80;
+  float cy0              = -0.2;
+  float cxVol            =  0.001;
+  float cyVol            = -0.005;
   
-  float cVol      = 0.01;
-  float cTimeAmp  = 0.1;
+  float cVol      = 1.0;
+  float cTimeAmp  = 1.0;
   float cTimeFreq = 1.0;
   
   Rulez_JuliaLike( String nickName_, String shaderName_ ){
@@ -96,7 +61,10 @@ class Rulez_JuliaLike implements RulingClass{
     float cy = cy0 + cos(time*cyTimeFreq*cTimeFreq)*cyTimeAmp*cTimeAmp + ydy[1]*cyVol*cVol;
     global_Cx = cx;
     global_Cy = cy;
-    sh.shader.begin(); sh.shader.uniform2f("Const", cx, cy ); 
+    sh.shader.begin(); 
+    sh.shader.uniform2f("Const" ,      cx, cy    ); 
+    sh.shader.uniform2f("CamRot",      time, 1.0 ); 
+    sh.shader.uniform2f("ColorShift" , time, 1.0 ); 
   };
   void start(){
     stack = new RenderStack( width, height, context );
@@ -130,6 +98,8 @@ class Rulez_JuliaLike implements RulingClass{
     cy0 += mY-global_Cy;
   }
   
+  int getType(){ return 1; };
+  
 }
 
 
@@ -154,4 +124,5 @@ class Rulez_JustRenderer implements RulingClass{
   String getName(){return name; };
   void mousePull(float mX, float mY){};
   void mouseSet (float mX, float mY){};
+  int getType(){ return 2; };
 }
